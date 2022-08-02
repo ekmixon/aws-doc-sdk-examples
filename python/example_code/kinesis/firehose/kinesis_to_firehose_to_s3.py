@@ -155,7 +155,7 @@ def main():
     kinesis_client = boto3.client('kinesis')
     with open(test_data_file, 'rb') as f:
         logging.info('Putting 20 records into the Kinesis stream one at a time')
-        for i in range(20):
+        for _ in range(20):
             # Read a record of test data
             line = next(f)
 
@@ -173,7 +173,7 @@ def main():
 
         # Put 200 records in a list
         logging.info('Putting 200 records into the Firehose in a batch')
-        batch = [{'Data': next(f)} for x in range(200)]
+        batch = [{'Data': next(f)} for _ in range(200)]
         [record.update({'PartitionKey': json.loads(record['Data'])['sector']}) for record in batch]
 
         # Put the list into the Kinesis stream
@@ -184,15 +184,13 @@ def main():
             logging.error(e)
             exit(1)
 
-        # Did any records in the batch not get processed?
-        num_failures = result['FailedRecordCount']
         '''
         # Test: Simulate a failed record
         num_failures = 1
         failed_rec_index = 3
         result['Records'][failed_rec_index]['ErrorCode'] = 404
         '''
-        if num_failures:
+        if num_failures := result['FailedRecordCount']:
             # Resend failed records
             logging.info(f'Resending {num_failures} failed records')
             rec_index = 0

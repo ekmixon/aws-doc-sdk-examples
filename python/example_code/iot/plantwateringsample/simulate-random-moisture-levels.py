@@ -54,11 +54,10 @@ SHADOW_HANDLER = "MyRPi"
 # Automatically called whenever the shadow is updated.
 def myShadowUpdateCallback(payload, responseStatus, token):
   print()
-  print('UPDATE: $aws/things/' + SHADOW_HANDLER + 
-    '/shadow/update/#')
-  print("payload = " + payload)
-  print("responseStatus = " + responseStatus)
-  print("token = " + token)
+  print((f'UPDATE: $aws/things/{SHADOW_HANDLER}' + '/shadow/update/#'))
+  print(f"payload = {payload}")
+  print(f"responseStatus = {responseStatus}")
+  print(f"token = {token}")
 
 # Create, configure, and connect a shadow client.
 myShadowClient = AWSIoTMQTTShadowClient(SHADOW_CLIENT)
@@ -77,11 +76,7 @@ myDeviceShadow = myShadowClient.createShadowHandlerWithName(
 # stops running.
 # To stop running this script, press Ctrl+C.
 while True:
-  # Generate random True or False test data to represent
-  # okay or low moisture levels, respectively.
-  moisture = random.choice([True, False])
-
-  if moisture:
+  if moisture := random.choice([True, False]):
     myDeviceShadow.shadowUpdate(
       '{"state":{"reported":{"moisture":"okay"}}}',
       myShadowUpdateCallback, 5)

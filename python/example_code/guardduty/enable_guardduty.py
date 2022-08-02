@@ -31,28 +31,28 @@ try:
             service_name='guardduty',
             region_name=region
         )
-    
+
     #Get the GuardDuty Detector for the current AWS Region
     detector=gd.list_detectors()
     if len(detector['DetectorIds']) > 0:
         detector_id = detector['DetectorIds'][0]
-        print('Detector exists in Region ' + region + ' Detector Id: ' + detector_id)
+        print(f'Detector exists in Region {region} Detector Id: {detector_id}')
     else:
-        print('GuardDuty Detector does not exist in Region ' + region)
-        print('Creating Detector in ' + region + ' ...')
+        print(f'GuardDuty Detector does not exist in Region {region}')
+        print(f'Creating Detector in {region} ...')
         create_detector(client=gd)
-    
+
     detector=gd.list_detectors()
     if len(detector['DetectorIds']) > 0:
         detector_id = detector['DetectorIds'][0]
         detector_details = gd.get_detector(DetectorId=detector_id)
         detector_status = detector_details['Status']
-        print('Detector ID ' + detector_id + ' in Region ' + region + ' is ' + detector_status)
+        print(f'Detector ID {detector_id} in Region {region} is {detector_status}')
         if detector_status == 'DISABLED':
-            print('Enabling Detector ' + detector_id + ' in ' + region + ' ...')
+            print(f'Enabling Detector {detector_id} in {region} ...')
             enable_detector(client=gd,detector=detector_id)
     else:
-        print('GuardDuty Detector does not exist in Region ' + region)
+        print(f'GuardDuty Detector does not exist in Region {region}')
 except Exception as e:
     print(e)
 

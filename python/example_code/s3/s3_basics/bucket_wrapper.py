@@ -158,7 +158,7 @@ def grant_log_delivery_access(bucket_name):
         acl = s3.Bucket(bucket_name).Acl()
         # Putting an ACL overwrites the existing ACL. If you want to preserve
         # existing grants, append new grants to the list of existing grants.
-        grants = acl.grants if acl.grants else []
+        grants = acl.grants or []
         grants.append({
             'Grantee': {
                 'Type': 'Group',

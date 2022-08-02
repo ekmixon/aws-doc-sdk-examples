@@ -133,8 +133,7 @@ class ComprehendDemoResources:
         :return: Job output as a dictionary where the keys are the individual file
                  names in the tar archive.
         """
-        output_key = job['OutputDataConfig']['S3Uri'].split(
-            self.bucket.name + '/')[1]
+        output_key = job['OutputDataConfig']['S3Uri'].split(f'{self.bucket.name}/')[1]
         try:
             output_bytes = io.BytesIO()
             self.bucket.download_fileobj(output_key, output_bytes)

@@ -53,8 +53,15 @@ parser.add_argument("-w", "--websocket", action="store_true", dest="useWebsocket
 parser.add_argument("-id", "--clientId", action="store", dest="clientId", default="basicPubSub",
                     help="Targeted client id")
 parser.add_argument("-t", "--topic", action="store", dest="topic", default="Camera1/capture/finished", help="Targeted topic")
-parser.add_argument("-m", "--mode", action="store", dest="mode", default="both",
-                    help="Operation modes: %s"%str(AllowedActions))
+parser.add_argument(
+    "-m",
+    "--mode",
+    action="store",
+    dest="mode",
+    default="both",
+    help=f"Operation modes: {str(AllowedActions)}",
+)
+
 parser.add_argument("-M", "--message", action="store", dest="message", default=True,
                     help="Message to publish")
 parser.add_argument("-n", "--thingName", action="store", dest="thingName", default="Bot", help="Targeted thing name")
@@ -76,7 +83,10 @@ images = ["https://images-na.ssl-images-amazon.com/images/I/41iz5Tw82IL._AC_US21
 "https://images-na.ssl-images-amazon.com/images/I/41+K4pC74XL._AC_US218_.jpg"]
 
 if args.mode not in AllowedActions:
-    parser.error("Unknown --mode option %s. Must be one of %s" % (args.mode, str(AllowedActions)))
+    parser.error(
+        f"Unknown --mode option {args.mode}. Must be one of {str(AllowedActions)}"
+    )
+
     exit(2)
 
 if args.useWebsocket and args.certificatePath and args.privateKeyPath:
@@ -124,21 +134,23 @@ myCount = 0
 # General message notification callback
 def customOnMessage(message):
     print('Received message on topic %s: %s\n' % (message.topic, message.payload))
-    message = {}
     global myCount
     myCount = myCount + 1
-    message['lastClickedImage'] = images[myCount%4]
+    message = {'lastClickedImage': images[myCount%4]}
     messageJson = json.dumps(message)
-    myAWSIoTMQTTClient.publish(thingName + "/capture/finished", messageJson, 0)
-    print('Published topic %s: %s\n' % (thingName + "/capture/finished", messageJson))
+    myAWSIoTMQTTClient.publish(f"{thingName}/capture/finished", messageJson, 0)
+    print(
+        'Published topic %s: %s\n'
+        % (f"{thingName}/capture/finished", messageJson)
+    )
 
 myAWSIoTMQTTClient.onMessage = customOnMessage
 
 
 # Connect and subscribe to AWS IoT
 myAWSIoTMQTTClient.connect()
-if args.mode == 'both' or args.mode == 'subscribe':
-    myAWSIoTMQTTClient.subscribe(thingName + "/capture", 0, customCallback)
+if args.mode in ['both', 'subscribe']:
+    myAWSIoTMQTTClient.subscribe(f"{thingName}/capture", 0, customCallback)
 time.sleep(2)
 
 # Publish to the same topic in a loop forever

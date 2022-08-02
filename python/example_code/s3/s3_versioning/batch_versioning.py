@@ -203,8 +203,12 @@ def create_lambda_function(iam_role, function_name, function_file_name, handler,
                 Publish=True
             ), 'InvalidParameterValueException', 5)
         function_arn = response['FunctionArn']
-        logger.info("Created function '%s' with ARN: '%s'.",
-                    function_name, response['FunctionArn'])
+        logger.info(
+            "Created function '%s' with ARN: '%s'.",
+            function_name,
+            function_arn,
+        )
+
     except ClientError:
         logger.exception("Couldn't create function %s.", function_name)
         raise
@@ -365,30 +369,26 @@ def create_batch_job(job, manifest):
             Description=job['description'],
             Priority=1,
             RoleArn=job['role_arn'],
-            Operation={
-                'LambdaInvoke': {
-                    'FunctionArn': job['function_arn']
-                }
-            },
+            Operation={'LambdaInvoke': {'FunctionArn': job['function_arn']}},
             Manifest={
                 'Spec': {
                     'Format': 'S3BatchOperations_CSV_20180820',
-                    'Fields': manifest_fields
+                    'Fields': manifest_fields,
                 },
                 'Location': {
-                    'ObjectArn':
-                        f"arn:aws:s3:::{manifest['bucket'].name}/{manifest['key']}",
-                    'ETag': manifest_e_tag if manifest_e_tag else manifest_obj.e_tag
-                }
+                    'ObjectArn': f"arn:aws:s3:::{manifest['bucket'].name}/{manifest['key']}",
+                    'ETag': manifest_e_tag or manifest_obj.e_tag,
+                },
             },
             Report={
                 'Bucket': f"arn:aws:s3:::{manifest['bucket'].name}",
                 'Format': 'Report_CSV_20180820',
                 'Enabled': True,
                 'Prefix': manifest['obj_prefix'],
-                'ReportScope': 'AllTasks'
-            }
+                'ReportScope': 'AllTasks',
+            },
         )
+
         logger.info("Created job %s.", response['JobId'])
     except ClientError:
         logger.exception("Couldn't create job to run function %s on manifest %s.",
@@ -602,7 +602,7 @@ def main():
     """
     prefix = 'demo-versioning'
     obj_prefix = f'{prefix}/'
-    bucket_name = f'{prefix}-bucket-' + str(uuid.uuid1())
+    bucket_name = f'{prefix}-bucket-{str(uuid.uuid1())}'
     role_name = f'{prefix}-s3-batch-role'
     function_info = {
         'revise_stanza': {

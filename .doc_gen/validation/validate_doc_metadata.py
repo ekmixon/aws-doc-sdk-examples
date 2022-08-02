@@ -40,9 +40,8 @@ class ExampleId(Validator):
     def _is_valid(self, value):
         if not re.fullmatch('^[\\da-z-]+(_[\\da-zA-Z]+)+$', value):
             return False
-        else:
-            svc = value.split('_')[0]
-            return svc == 'cross' or svc in self.services
+        svc = value.split('_')[0]
+        return svc == 'cross' or svc in self.services
 
 
 class BlockContent(Validator):

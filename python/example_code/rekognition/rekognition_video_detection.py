@@ -231,12 +231,13 @@ class RekognitionVideo:
         """
         job_id = self._start_rekognition_job(job_description, start_job_func)
         status = self.poll_notification(job_id)
-        if status == 'SUCCEEDED':
-            results = self._get_rekognition_job_results(
-                job_id, get_results_func, result_extractor)
-        else:
-            results = []
-        return results
+        return (
+            self._get_rekognition_job_results(
+                job_id, get_results_func, result_extractor
+            )
+            if status == 'SUCCEEDED'
+            else []
+        )
 
     def do_label_detection(self):
         """

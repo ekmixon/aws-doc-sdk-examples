@@ -112,19 +112,17 @@ def rollback_object(bucket, object_key, version_id):
         '\n'.join([f"\t{version.version_id}, last modified {version.last_modified}"
                    for version in versions]))
 
-    if version_id in [ver.version_id for ver in versions]:
-        print(f"Rolling back to version {version_id}")
-        for version in versions:
-            if version.version_id != version_id:
-                version.delete()
-                print(f"Deleted version {version.version_id}")
-            else:
-                break
-
-        print(f"Active version is now {bucket.Object(object_key).version_id}")
-    else:
+    if version_id not in [ver.version_id for ver in versions]:
         raise KeyError(f"{version_id} was not found in the list of versions for "
                        f"{object_key}.")
+    print(f"Rolling back to version {version_id}")
+    for version in versions:
+        if version.version_id == version_id:
+            break
+
+        version.delete()
+        print(f"Deleted version {version.version_id}")
+    print(f"Active version is now {bucket.Object(object_key).version_id}")
 # snippet-end:[s3.python.versioning.rollback_object]
 
 
@@ -201,7 +199,7 @@ def usage_demo_single_object(obj_prefix='demo-versioning/'):
           "S3 bucket and then applies various revisions to it.")
     print('-'*width)
     print("Creating a version-enabled bucket for the demo...")
-    bucket = create_versioned_bucket('bucket-' + str(uuid.uuid1()), obj_prefix)
+    bucket = create_versioned_bucket(f'bucket-{str(uuid.uuid1())}', obj_prefix)
 
     print("\nThe initial version of our stanza:")
     print(stanzas[0])
@@ -255,7 +253,7 @@ def usage_demo_single_object(obj_prefix='demo-versioning/'):
     print("\nPermanently deleting all versions of the stanza...")
     permanently_delete_object(bucket, obj_stanza_1.key)
     obj_stanza_1_versions = bucket.object_versions.filter(Prefix=obj_stanza_1.key)
-    if len(list(obj_stanza_1_versions)) == 0:
+    if not list(obj_stanza_1_versions):
         print("The stanza has been permanently deleted and now has no versions.")
     else:
         print("Something went wrong. The stanza still exists!")

@@ -54,7 +54,9 @@ def usage_demo(outputs):
     """
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(
-        'textract-public-assets-' + s3_resource.meta.client.meta.region_name)
+        f'textract-public-assets-{s3_resource.meta.client.meta.region_name}'
+    )
+
     default_image_name = 'default_document_3.png'
     default_image_bytes = BytesIO()
     bucket.download_fileobj(default_image_name, default_image_bytes)

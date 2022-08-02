@@ -84,7 +84,9 @@ def do_batch_get(batch_keys):
         if len(unprocessed) > 0:
             batch_keys = unprocessed
             unprocessed_count = sum(
-                [len(batch_key['Keys']) for batch_key in batch_keys.values()])
+                len(batch_key['Keys']) for batch_key in batch_keys.values()
+            )
+
             logger.info(
                 "%s unprocessed keys returned. Sleep, then retry.",
                 unprocessed_count)
@@ -287,7 +289,7 @@ def usage_demo():
         {'name': 'name', 'key_type': 'HASH', 'type': 'S'},
     ]
 
-    print(f"Creating movie and actor tables and waiting until they exist...")
+    print("Creating movie and actor tables and waiting until they exist...")
     movie_table = create_table(f'demo-batch-movies-{time.time_ns()}', movie_schema)
     actor_table = create_table(f'demo-batch-actors-{time.time_ns()}', actor_schema)
     print(f"Created {movie_table.name} and {actor_table.name}.")
@@ -298,16 +300,18 @@ def usage_demo():
     print(f"Putting {len(actor_data)} actors into {actor_table.name}.")
     fill_table(actor_table, actor_data)
 
-    movie_list = [(movie['year'], movie['title'])
-                  for movie in movie_data[0:int(MAX_GET_SIZE/2)]]
-    actor_list = [actor['name']
-                  for actor in actor_data[0:int(MAX_GET_SIZE/2)]]
+    movie_list = [
+        (movie['year'], movie['title'])
+        for movie in movie_data[: int(MAX_GET_SIZE / 2)]
+    ]
+
+    actor_list = [actor['name'] for actor in actor_data[:int(MAX_GET_SIZE/2)]]
     items = get_batch_data(movie_table, movie_list, actor_table, actor_list)
     print(f"Got {len(items[movie_table.name])} movies from {movie_table.name}\n"
           f"and {len(items[actor_table.name])} actors from {actor_table.name}.")
     print("The first 2 movies returned are: ")
     pprint.pprint(items[movie_table.name][:2])
-    print(f"The first 2 actors returned are: ")
+    print("The first 2 actors returned are: ")
     pprint.pprint(items[actor_table.name][:2])
 
     print(
@@ -315,7 +319,7 @@ def usage_demo():
         "movies and deleting them from the main movie table.")
     # Duplicate the movies in the list to demonstrate how the batch writer can be
     # configured to remove duplicate requests from the batch.
-    movie_list = movie_data[0:10] + movie_data[0:10]
+    movie_list = movie_data[:10] + movie_data[:10]
     archive_table = archive_movies(movie_table, movie_list)
     print(f"Movies successfully archived to {archive_table.name}.")
 

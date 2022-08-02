@@ -41,7 +41,9 @@ def write_data_to_dax_table(key_count, item_size, dyn_resource=None):
 if __name__ == '__main__':
     write_key_count = 10
     write_item_size = 1000
-    print(f"Writing {write_key_count*write_key_count} items to the table. "
-          f"Each item is {write_item_size} characters.")
+    print(
+        f"Writing {write_key_count**2} items to the table. Each item is {write_item_size} characters."
+    )
+
     write_data_to_dax_table(write_key_count, write_item_size)
 # snippet-end:[dynamodb.Python.TryDax.02-write-data]

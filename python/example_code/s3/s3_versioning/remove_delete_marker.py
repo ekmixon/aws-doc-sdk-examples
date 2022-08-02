@@ -62,28 +62,27 @@ def lambda_handler(event, context):
         except ClientError as error:
             delete_marker = error.response['ResponseMetadata']['HTTPHeaders'] \
                 .get('x-amz-delete-marker', 'false')
-            if delete_marker == 'true':
-                logger.info("Object %s, version %s is a delete marker.",
-                            obj_key, obj_version_id)
-                try:
-                    s3.delete_object(
-                        Bucket=bucket_name, Key=obj_key, VersionId=obj_version_id)
-                    result_code = 'Succeeded'
-                    result_string = f"Successfully removed delete marker " \
-                                    f"{obj_version_id} from object {obj_key}."
-                    logger.info(result_string)
-                except ClientError as error:
-                    # Mark request timeout as a temporary failure so it will be retried.
-                    if error.response['Error']['Code'] == 'RequestTimeout':
-                        result_code = 'TemporaryFailure'
-                        result_string = f"Attempt to remove delete marker from  " \
-                                        f"object {obj_key} timed out."
-                        logger.info(result_string)
-                    else:
-                        raise
-            else:
-                raise ValueError(f"The x-amz-delete-marker header is either not "
-                                 f"present or is not 'true'.")
+            if delete_marker != 'true':
+                raise ValueError(
+                    "The x-amz-delete-marker header is either not present or is not 'true'."
+                )
+
+            logger.info("Object %s, version %s is a delete marker.",
+                        obj_key, obj_version_id)
+            try:
+                s3.delete_object(
+                    Bucket=bucket_name, Key=obj_key, VersionId=obj_version_id)
+                result_code = 'Succeeded'
+                result_string = f"Successfully removed delete marker " \
+                                f"{obj_version_id} from object {obj_key}."
+                logger.info(result_string)
+            except ClientError as error:
+                if error.response['Error']['Code'] != 'RequestTimeout':
+                    raise
+                result_code = 'TemporaryFailure'
+                result_string = f"Attempt to remove delete marker from  " \
+                                f"object {obj_key} timed out."
+                logger.info(result_string)
     except Exception as error:
         # Mark all other exceptions as permanent failures.
         result_code = 'PermanentFailure'

@@ -103,8 +103,12 @@ def test_list_faces(make_stubber, error_code):
     rekognition_stubber = make_stubber(rekognition_client)
     max_faces = 3
     faces = [
-        RekognitionFace({'FaceIndex': f'face-{index}', 'ImageIndex': f'image-{index}'})
-        for index in range(0, 3)]
+        RekognitionFace(
+            {'FaceIndex': f'face-{index}', 'ImageIndex': f'image-{index}'}
+        )
+        for index in range(3)
+    ]
+
     collection = make_collection(rekognition_client)
 
     rekognition_stubber.stub_list_faces(
@@ -131,8 +135,12 @@ def test_search_face_by_image(make_stubber, make_faces, error_code):
     max_faces = 3
     image_face = RekognitionFace(make_faces(1)[0])
     faces = [
-        RekognitionFace({'FaceIndex': f'face-{index}', 'ImageIndex': f'image-{index}'})
-        for index in range(0, 3)]
+        RekognitionFace(
+            {'FaceIndex': f'face-{index}', 'ImageIndex': f'image-{index}'}
+        )
+        for index in range(3)
+    ]
+
 
     rekognition_stubber.stub_search_faces_by_image(
         collection.collection_id, image, threshold, max_faces, image_face,
@@ -160,8 +168,12 @@ def test_search_faces(make_stubber, make_faces, error_code):
     threshold = 80
     max_faces = 3
     faces = [
-        RekognitionFace({'FaceIndex': f'face-{index}', 'ImageIndex': f'image-{index}'})
-        for index in range(0, 3)]
+        RekognitionFace(
+            {'FaceIndex': f'face-{index}', 'ImageIndex': f'image-{index}'}
+        )
+        for index in range(3)
+    ]
+
 
     rekognition_stubber.stub_search_faces(
         collection.collection_id, face_id, threshold, max_faces, faces,
@@ -183,7 +195,7 @@ def test_delete_faces(make_stubber, error_code):
     rekognition_client = boto3.client('rekognition')
     rekognition_stubber = make_stubber(rekognition_client)
     collection = make_collection(rekognition_client)
-    face_ids = [f'test-face-id-{index}' for index in range(0, 3)]
+    face_ids = [f'test-face-id-{index}' for index in range(3)]
 
     rekognition_stubber.stub_delete_faces(
         collection.collection_id, face_ids, error_code=error_code)
@@ -225,9 +237,13 @@ def test_list_collections(make_stubber, error_code):
     rekognition_stubber = make_stubber(rekognition_client)
     collection_mgr = RekognitionCollectionManager(rekognition_client)
     max_results = 3
-    collections = [RekognitionCollection(
-        {'CollectionId': f'test-collection-id-{index}'}, rekognition_client)
-        for index in range(0, 3)]
+    collections = [
+        RekognitionCollection(
+            {'CollectionId': f'test-collection-id-{index}'}, rekognition_client
+        )
+        for index in range(3)
+    ]
+
 
     rekognition_stubber.stub_list_collections(
         max_results, [col.collection_id for col in collections], error_code=error_code)

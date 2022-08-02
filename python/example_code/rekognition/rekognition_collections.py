@@ -61,13 +61,12 @@ class RekognitionCollection:
 
         :return: The collection data as a dict.
         """
-        rendering = {
+        return {
             'collection_id': self.collection_id,
             'collection_arn': self.collection_arn,
             'face_count': self.face_count,
-            'created': self.created
+            'created': self.created,
         }
-        return rendering
 
     def describe_collection(self):
         """

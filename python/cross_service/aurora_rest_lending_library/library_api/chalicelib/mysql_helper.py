@@ -138,8 +138,7 @@ def create_table(table):
                 f'FOREIGN KEY ({col.name}) REFERENCES {col.foreign_key.reference()}')
     col_clause = ', '.join(cols)
     constraint_clause = ', '.join(constraints)
-    sql = f"{create_clause} ({', '.join([col_clause, constraint_clause])})"
-    return sql
+    return f"{create_clause} ({', '.join([col_clause, constraint_clause])})"
 
 
 def insert(table, value_sets):
@@ -229,11 +228,15 @@ def unpack_query_results(columns, results):
     :param results: The results returned from the SELECT query.
     :return: The query records as a list of Python dicts.
     """
-    output = [{
-        col_key: val.get(VALUE_KEYS[col.data_type], None)
-        for col_key, col, val in zip(columns.keys(), columns.values(), record)
-    } for record in results['records']]
-    return output
+    return [
+        {
+            col_key: val.get(VALUE_KEYS[col.data_type], None)
+            for col_key, col, val in zip(
+                columns.keys(), columns.values(), record
+            )
+        }
+        for record in results['records']
+    ]
 
 
 def unpack_insert_results(results):

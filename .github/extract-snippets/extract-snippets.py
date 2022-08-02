@@ -116,7 +116,10 @@ class Snipper:
             self.errors += 1
             return
         if TAB in self.text and "snippet-start" in self.text:
-            print("    WARNING tab(s) found in %s may cause formatting problems in docs" % path)
+            print(
+                f"    WARNING tab(s) found in {path} may cause formatting problems in docs"
+            )
+
         # process each line in source file. self.i is the line we're on (for error messages)
         for self.i, self.line in enumerate(self.text.splitlines(keepends=False), start=1):
             line = self.line            # use a local variable for a bit more performance
@@ -127,23 +130,37 @@ class Snipper:
                 if func and callable(func):
                     func(self.arg)      # call our method named same as directive (e.g. start(..) for snippet-start)
                 else:
-                    print("    ERROR invalid directive snippet-%s at %s in %s" % (self.directive, self.i, self.path))
+                    print(
+                        f"    ERROR invalid directive snippet-{self.directive} at {self.i} in {self.path}"
+                    )
+
                     self.errors += 1
-                    self.issues[path].add("invalid directive snippet-%s" % self.directive)
-            else:                       # line is NOT a snippet directive. write it to any open snippet files
+                    self.issues[path].add(f"invalid directive snippet-{self.directive}")
+            else:           # line is NOT a snippet directive. write it to any open snippet files
                 for snip, file in self.files.items():           # for each snippet file we're writing, write the line
                     dedent = self.dedent[snip]
                     if dedent and line[:dedent].strip():        # is the text we want to strip to dedent all whitespace? error if not 
-                        print(("    ERROR unable to dedent %s space(s) " % dedent) + 
-                            ("in snippet %s at line %s in %s " % self._where) + 
-                            f"(only indented {len(line) - len(line.lstrip())} spaces)")
+                        print(
+                            (
+                                (
+                                    f"    ERROR unable to dedent {dedent} space(s) "
+                                    + "in snippet %s at line %s in %s "
+                                    % self._where
+                                )
+                                + f"(only indented {len(line) - len(line.lstrip())} spaces)"
+                            )
+                        )
+
                         self.errors += 1
                     file.write(line[dedent:].rstrip() + EOL)    # write it (strip whitespace at end just to be neat)
         # done processing this file. make sure all snippets had snippet-end tags
         for snip, file in self.files.items():
-            print("    ERROR snippet-end tag for %s missing in %s, extracted to end of file" % (snip, path))
+            print(
+                f"    ERROR snippet-end tag for {snip} missing in {path}, extracted to end of file"
+            )
+
             file.close()
-            self.issues[path].add("snippet-end tag for %s missing" % snip)
+            self.issues[path].add(f"snippet-end tag for {snip} missing")
             self.errors += 1
 
     # directive: beginning of snippet
@@ -162,15 +179,19 @@ class Snipper:
                 printer = lambda *a: print("WARNING redundant snippet %s at line %s in %s" % self._where)
                 self.duplicates.add(arg)
             else:
-                printer = lambda *a: print("    ERROR duplicate snippet %s at line %s in %s" % self._where,
-                    "(also in %s)" % self.source[arg])
+                printer = lambda *a: print(
+                    "    ERROR duplicate snippet %s at line %s in %s"
+                    % self._where,
+                    f"(also in {self.source[arg]})",
+                )
+
                 pfxlen = len(os.path.commonprefix([self.path, self.source[arg]]))
                 path1 = self.source[arg][pfxlen:]
                 if "/" not in path1: path1 = self.source[arg]
                 path2 = self.path[pfxlen:]
                 if "/" not in path2: path2 = self.path
-                self.issues[self.path].add("%s also declared in %s" % (arg, path1))
-                self.issues[self.source[arg]].add("%s also declared in %s" % (arg, path2))
+                self.issues[self.path].add(f"{arg} also declared in {path1}")
+                self.issues[self.source[arg]].add(f"{arg} also declared in {path2}")
                 self.errors += 1
             opener = DummyFile      # don't write to the file, but still track it so we can detect missing snippet-end
         else:
@@ -186,9 +207,9 @@ class Snipper:
 
     # directive: append to given file (for extracting multiple chunks of code to a single snippet)
     def append(self, arg):
-        if arg in self.files:           # is the file already open?
+        if arg in self.files:   # is the file already open?
             print("    ERROR snippet %s already open at line %s in %s" % self._where)
-            self.issues[self,path].add("snippet %s opened multiple times" % arg)
+            self.issues[self,path].add(f"snippet {arg} opened multiple times")
             self.errors += 1
             return
         if arg not in self.started:     # did we start this snippet in current source file?
@@ -196,7 +217,12 @@ class Snipper:
             self.issues[self.path].add("snippet %s doesn't exist" % arg)
             self.errors += 1
             return
-        self.files[arg] = DummyFile() if arg in self.duplicates else open(os.path.join(self.dir, arg) + ".txt", "a")
+        self.files[arg] = (
+            DummyFile()
+            if arg in self.duplicates
+            else open(f"{os.path.join(self.dir, arg)}.txt", "a")
+        )
+
         print("    APPEND", arg)
 
     # directive: end of snippet
@@ -206,7 +232,7 @@ class Snipper:
             del self.files[arg]
         else:
             print("    ERROR snippet file %s not open at %s in %s" % self._where)
-            self.issues[self.path].add("snippet-end tag for %s which is not open" % arg)
+            self.issues[self.path].add(f"snippet-end tag for {arg} which is not open")
             self.errors += 1
 
     # directive: insert arg verbatim as a line into all currently open snippets
@@ -239,24 +265,16 @@ def err_exit(msg):
 # ----------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    
-    # read list of filenames from stdin first, so we don't get broken pipe if we error out
-    stdin_lines = []
-    if not sys.stdin.isatty():
-        stdin_lines = sys.stdin.readlines()
 
+    stdin_lines = [] if sys.stdin.isatty() else sys.stdin.readlines()
     # get output directory from command line, or error
     if len(sys.argv) > 1 and os.path.isdir(sys.argv[1]):
         snippetdir = sys.argv[1]
     else:
         err_exit("snippet output directory not passed or does not exist")
-    
-    # get filename of extersions list from command line, or use default, then load it
-    if len(sys.argv) > 2:
-        commentfile = sys.argv[2]
-    else:
-        commentfile = "snippet-extensions.yml"
 
+    # get filename of extersions list from command line, or use default, then load it
+    commentfile = sys.argv[2] if len(sys.argv) > 2 else "snippet-extensions.yml"
     # reports to be printed can be passed in via environment variable REPORTS
     # if this value is not set, print all reports
     reports = os.environ.get("REPORTS", "log issues index").lower().split()
@@ -265,7 +283,7 @@ if __name__ == "__main__":
     if "/" not in commentfile and "\\" not in commentfile:
         commentfile = os.path.join(os.path.dirname(__file__), commentfile)
     if not os.path.isfile(commentfile):
-        err_exit("source file extension map %s not found" % commentfile)
+        err_exit(f"source file extension map {commentfile} not found")
     with open(commentfile) as comments:
         MAP_EXT_MARKER = yaml.safe_load(comments)
         if not isinstance(MAP_EXT_MARKER, dict):
@@ -274,8 +292,10 @@ if __name__ == "__main__":
             if isinstance(k, str) and isinstance(v, str):
                 MAP_EXT_MARKER[k] = v.split()
             else:
-                err_exit("key, value must both be strings; got %s, %s (%s, %s)" % 
-                    (k, v, type(k).__name__, type(v).__name__))
+                err_exit(
+                    f"key, value must both be strings; got {k}, {v} ({type(k).__name__}, {type(v).__name__})"
+                )
+
 
     print("==== extracting snippets in source files", 
         " ".join(ex for ex in MAP_EXT_MARKER if ex and MAP_EXT_MARKER[ex]), "\n")
@@ -291,21 +311,20 @@ if __name__ == "__main__":
             if not path:                                    # skip blank lines in input
                 continue
             # make sure relative path starts with ./ so that e.g. /Makefile in the extensions map
-            # can be used to match an entire filename. 
+            # can be used to match an entire filename.
             if not (path.startswith(("./", "/", "\\")) or   # already relative or Linux/Mac absolute path or UNC path
                 (path[0].isalpha() and path[1] == ":")):    # already Windows absolute path
-                    path = "./" + path
+                path = f"./{path}"
             if "/." in path or "\\." in path:               # skip hidden file or directory
                 continue
             seen += 1                                       # count files seen (not hidden)
             # find first extension from extension map that matches current file
             # replace backslashes with forward slashes for purposes of matching so it works with Windows or UNC paths
             ext = next((ext for ext in MAP_EXT_MARKER if path.replace("\\", "/").endswith(ext)), None)
-            markers = MAP_EXT_MARKER.get(ext, ())
-            if markers:                                     # process it if we know its comment markers
+            if markers := MAP_EXT_MARKER.get(ext, ()):
                 snipper(path, markers)
                 processed += 1
-    
+
     # files with issues report (files with most issues first)
     if "issues" in reports:
         if snipper.issues:

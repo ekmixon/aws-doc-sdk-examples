@@ -205,7 +205,7 @@ def encrypt_file(filename, cmk_id):
 
     # Write the encrypted data key and encrypted file contents together
     try:
-        with open(filename + '.encrypted', 'wb') as file_encrypted:
+        with open(f'{filename}.encrypted', 'wb') as file_encrypted:
             file_encrypted.write(len(data_key_encrypted).to_bytes(NUM_BYTES_FOR_LEN,
                                                                   byteorder='big'))
             file_encrypted.write(data_key_encrypted)
@@ -235,7 +235,7 @@ def decrypt_file(filename):
 
     # Read the encrypted file into memory
     try:
-        with open(filename + '.encrypted', 'rb') as file:
+        with open(f'{filename}.encrypted', 'rb') as file:
             file_contents = file.read()
     except IOError as e:
         logging.error(e)
@@ -262,7 +262,7 @@ def decrypt_file(filename):
 
     # Write the decrypted file contents
     try:
-        with open(filename + '.decrypted', 'wb') as file_decrypted:
+        with open(f'{filename}.decrypted', 'wb') as file_decrypted:
             file_decrypted.write(file_contents_decrypted)
     except IOError as e:
         logging.error(e)
@@ -307,20 +307,15 @@ def main():
         logging.info('Retrieved existing AWS KMS CMK')
 
     # Use the key to encrypt and decrypt a file
-    if file_to_encrypt:
-        # Encrypted file contents are written to <file_to_encrypt>.encrypted
-        # An encrypted data key is also written to the output file.
-        # The encrypted file can be decrypted at any time and by any program
-        # that has the credentials to decrypt the data key.
-        if encrypt_file(file_to_encrypt, cmk_arn):
-            logging.info(f'{file_to_encrypt} encrypted to '
-                         f'{file_to_encrypt}.encrypted')
+    if file_to_encrypt and encrypt_file(file_to_encrypt, cmk_arn):
+        logging.info(f'{file_to_encrypt} encrypted to '
+                     f'{file_to_encrypt}.encrypted')
 
-            # Decrypt the file
-            if decrypt_file(file_to_encrypt):
-                # Decrypted file contents are written to <file_to_encrypt>.decrypted
-                logging.info(f'{file_to_encrypt}.encrypted decrypted to '
-                             f'{file_to_encrypt}.decrypted')
+        # Decrypt the file
+        if decrypt_file(file_to_encrypt):
+            # Decrypted file contents are written to <file_to_encrypt>.decrypted
+            logging.info(f'{file_to_encrypt}.encrypted decrypted to '
+                         f'{file_to_encrypt}.decrypted')
 
 
 if __name__ == '__main__':

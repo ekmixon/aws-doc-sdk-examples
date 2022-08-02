@@ -76,7 +76,7 @@ class RepositoryMigration:
 
         # push all branch references
         for branch in self.local_repo.heads:
-            print("Pushing branch %s" % branch.name)
+            print(f"Pushing branch {branch.name}")
             self.do_push_with_retries(ref=branch.name)
 
         # push all tags
@@ -164,12 +164,8 @@ class RepositoryMigration:
             self.do_push_with_retries(ref=tag.name)
 
     def do_push_with_retries(self, ref=None, push_tags=False):
-        for i in range(0, self.PUSH_RETRY_LIMIT):
-            if i == 0:
-                progress_printer = PushProgressPrinter()
-            else:
-                progress_printer = None
-
+        for i in range(self.PUSH_RETRY_LIMIT):
+            progress_printer = PushProgressPrinter() if i == 0 else None
             try:
                 if push_tags:
                     infos = self.remote_repo.push(tags=True, progress=progress_printer)
@@ -204,7 +200,11 @@ class RepositoryMigration:
 
     def get_remote_migration_tags(self):
         remote_tags_output = self.local_repo.git.ls_remote(self.remote_name, tags=True).split('\n')
-        self.remote_migration_tags = dict((tag.split()[1].replace("refs/tags/",""), tag.split()[0]) for tag in remote_tags_output if self.MIGRATION_TAG_PREFIX in tag)
+        self.remote_migration_tags = {
+            tag.split()[1].replace("refs/tags/", ""): tag.split()[0]
+            for tag in remote_tags_output
+            if self.MIGRATION_TAG_PREFIX in tag
+        }
 
     def clean_up(self, clean_up_remote=False):
         tags = [tag for tag in self.local_repo.tags if tag.name.startswith(self.MIGRATION_TAG_PREFIX)]
@@ -214,7 +214,7 @@ class RepositoryMigration:
 
         # delete the remote tags
         if clean_up_remote:
-            tags_to_delete = [":" + tag_name for tag_name in self.remote_migration_tags]
+            tags_to_delete = [f":{tag_name}" for tag_name in self.remote_migration_tags]
             self.remote_repo.push(refspec=tags_to_delete)
 
 parser = OptionParser()

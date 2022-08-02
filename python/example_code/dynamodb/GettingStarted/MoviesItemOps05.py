@@ -44,8 +44,7 @@ def remove_actors(title, year, actor_count, dynamodb=None):
 
 if __name__ == '__main__':
     print("Attempting conditional update (expecting failure)...")
-    update_response = remove_actors("The Big New Movie", 2015, 3)
-    if update_response:
+    if update_response := remove_actors("The Big New Movie", 2015, 3):
         print("Update movie succeeded:")
         pprint(update_response, sort_dicts=False)
 # snippet-end:[dynamodb.python.codeexample.MoviesItemOps05]

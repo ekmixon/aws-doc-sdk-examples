@@ -62,7 +62,7 @@ class Datasets:
             finished = False
             status = ""
 
-            while finished is False:
+            while not finished:
 
                 dataset_description = lookoutvision_client.describe_dataset(
                     ProjectName=project_name, DatasetType=dataset_type
@@ -135,17 +135,13 @@ class Datasets:
                 src_bucket = s3_resource.Bucket(bucket)
                 # create json lines for abnormal images.
 
-                for obj in src_bucket.objects.filter(
-                    Prefix=prefix + "anomaly/", Delimiter="/"
-                ):
+                for obj in src_bucket.objects.filter(Prefix=f"{prefix}anomaly/", Delimiter="/"):
                     image_path = f"s3://{src_bucket.name}/{obj.key}"
                     manifest = Datasets.create_json_line(image_path, "anomaly", dttm)
                     mfile.write(json.dumps(manifest) + "\n")
 
                 # create json lines for normal images
-                for obj in src_bucket.objects.filter(
-                    Prefix=prefix + "normal/", Delimiter="/"
-                ):
+                for obj in src_bucket.objects.filter(Prefix=f"{prefix}normal/", Delimiter="/"):
                     image_path = f"s3://{src_bucket.name}/{obj.key}"
                     manifest = Datasets.create_json_line(image_path, "normal", dttm)
                     mfile.write(json.dumps(manifest) + "\n")
@@ -186,11 +182,9 @@ class Datasets:
         else:
             logger.exception("Unexpected label value: %s for %s", str(label), image)
 
-            raise Exception(
-                "Unexpected label value: {} for {}".format(str(label), image)
-            )
+            raise Exception(f"Unexpected label value: {label} for {image}")
 
-        manifest = {
+        return {
             "source-ref": image,
             "anomaly-label": label,
             "anomaly-label-metadata": {
@@ -202,7 +196,6 @@ class Datasets:
                 "type": "groundtruth/image-classification",
             },
         }
-        return manifest
 
     @staticmethod
     def delete_dataset(lookoutvision_client, project_name, dataset_type):

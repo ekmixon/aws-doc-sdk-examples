@@ -230,19 +230,17 @@ def start_update_or_create(job_id, stack, template):
         if status not in ['CREATE_COMPLETE', 'ROLLBACK_COMPLETE', 'UPDATE_COMPLETE']:
             # If the CloudFormation stack is not in a state where
             # it can be updated again then fail the job right away.
-            put_job_failure(job_id, 'Stack cannot be updated when status is: ' + status)
+            put_job_failure(job_id, f'Stack cannot be updated when status is: {status}')
             return
-        
-        were_updates = update_stack(stack, template)
-        
-        if were_updates:
+
+        if were_updates := update_stack(stack, template):
             # If there were updates then continue the job so it can monitor
             # the progress of the update.
             continue_job_later(job_id, 'Stack update started')  
-            
+
         else:
             # If there were no updates then succeed the job immediately 
-            put_job_success(job_id, 'There were no stack updates')    
+            put_job_success(job_id, 'There were no stack updates')
     else:
         # If the stack doesn't already exist then create it instead
         # of updating it.
@@ -266,18 +264,18 @@ def check_stack_update_status(job_id, stack):
         # If the update/create finished successfully then
         # succeed the job and don't continue.
         put_job_success(job_id, 'Stack update complete')
-        
+
     elif status in ['UPDATE_IN_PROGRESS', 'UPDATE_ROLLBACK_IN_PROGRESS', 
     'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS', 'CREATE_IN_PROGRESS', 
     'ROLLBACK_IN_PROGRESS']:
         # If the job isn't finished yet then continue it
         continue_job_later(job_id, 'Stack update still in progress') 
-       
+
     else:
         # If the Stack is a state which isn't "in progress" or "complete"
         # then the stack update/create has failed so end the job with
         # a failed result.
-        put_job_failure(job_id, 'Update failed: ' + status)
+        put_job_failure(job_id, f'Update failed: {status}')
 
 def get_user_params(job_data):
     """Decodes the JSON user parameters and validates the required properties.
@@ -296,28 +294,28 @@ def get_user_params(job_data):
         # Get the user parameters which contain the stack, artifact and file settings
         user_parameters = job_data['actionConfiguration']['configuration']['UserParameters']
         decoded_parameters = json.loads(user_parameters)
-            
+
     except Exception as e:
         # We're expecting the user parameters to be encoded as JSON
         # so we can pass multiple values. If the JSON can't be decoded
         # then fail the job with a helpful message.
         raise Exception('UserParameters could not be decoded as JSON')
-    
+
     if 'stack' not in decoded_parameters:
         # Validate that the stack is provided, otherwise fail the job
         # with a helpful message.
         raise Exception('Your UserParameters JSON must include the stack name')
-    
+
     if 'artifact' not in decoded_parameters:
         # Validate that the artifact name is provided, otherwise fail the job
         # with a helpful message.
         raise Exception('Your UserParameters JSON must include the artifact name')
-    
+
     if 'file' not in decoded_parameters:
         # Validate that the template file is provided, otherwise fail the job
         # with a helpful message.
         raise Exception('Your UserParameters JSON must include the template file name')
-    
+
     return decoded_parameters
     
 def setup_s3_client(job_data):
@@ -359,20 +357,20 @@ def lambda_handler(event, context):
     try:
         # Extract the Job ID
         job_id = event['CodePipeline.job']['id']
-        
+
         # Extract the Job Data 
         job_data = event['CodePipeline.job']['data']
-        
+
         # Extract the params
         params = get_user_params(job_data)
-        
+
         # Get the list of artifacts passed to the function
         artifacts = job_data['inputArtifacts']
-        
+
         stack = params['stack']
         artifact = params['artifact']
         template_file = params['file']
-        
+
         if 'continuationToken' in job_data:
             # If we're continuing then the create/update has already been triggered
             # we just need to check if it has finished.
@@ -390,12 +388,12 @@ def lambda_handler(event, context):
     except Exception as e:
         # If any other exceptions which we didn't expect are raised
         # then fail the job and log the exception message.
-        print('Function failed due to exception.') 
+        print('Function failed due to exception.')
         print(e)
         traceback.print_exc()
-        put_job_failure(job_id, 'Function exception: ' + str(e))
-      
-    print('Function complete.')   
+        put_job_failure(job_id, f'Function exception: {str(e)}')
+
+    print('Function complete.')
     return "Complete."
 
 

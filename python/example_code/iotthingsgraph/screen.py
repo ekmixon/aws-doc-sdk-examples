@@ -97,29 +97,27 @@ while retryCount != 0:
         # We only pick the first ca and core info
         groupId, ca = caList[0]
         coreInfo = coreList[0]
-        print("Discovered GGC: %s from Group: %s" % (coreInfo.coreThingArn, groupId))
+        print(f"Discovered GGC: {coreInfo.coreThingArn} from Group: {groupId}")
 
         print("Now we persist the connectivity/identity information...")
         groupCA = GROUP_CA_PATH + groupId + "_CA_" + str(uuid.uuid4()) + ".crt"
         if not os.path.exists(GROUP_CA_PATH):
             os.makedirs(GROUP_CA_PATH)
-        groupCAFile = open(groupCA, "w")
-        groupCAFile.write(ca)
-        groupCAFile.close()
-
+        with open(groupCA, "w") as groupCAFile:
+            groupCAFile.write(ca)
         discovered = True
         print("Now proceed to the connecting flow...")
         break
     except DiscoveryInvalidRequestException as e:
         print("Invalid discovery request detected!")
-        print("Type: %s" % str(type(e)))
-        print("Error message: %s" % e.message)
+        print(f"Type: {str(type(e))}")
+        print(f"Error message: {e.message}")
         print("Stopping...")
         break
     except Exception as e:
         print("Error in discovery!")
-        print("Type: %s" % str(type(e)))
-        print("Error message: %s" % e)
+        print(f"Type: {str(type(e))}")
+        print(f"Error message: {e}")
         retryCount -= 1
         print("\n%d/%d retries left\n" % (retryCount, MAX_DISCOVERY_RETRIES))
         print("Backing off...\n")
@@ -152,16 +150,16 @@ for connectivityInfo in coreInfo.connectivityInfoList:
         break
     except Exception as e:
         print("Error in connect!")
-        print("Type: %s" % str(type(e)))
-        print("Error message: %s" % e)
+        print(f"Type: {str(type(e))}")
+        print(f"Error message: {e}")
 
 if not connected:
-    print("Cannot connect to core %s. Exiting..." % coreInfo.coreThingArn)
+    print(f"Cannot connect to core {coreInfo.coreThingArn}. Exiting...")
     sys.exit(-2)
 
 # Successfully connected to the core
 #if args.mode == 'both' or args.mode == 'subscribe':
-myAWSIoTMQTTClient.subscribe(thingName + "/display", 0, None)
+myAWSIoTMQTTClient.subscribe(f"{thingName}/display", 0, None)
 time.sleep(2)
 
 while True:

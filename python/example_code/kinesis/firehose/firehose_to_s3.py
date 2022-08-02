@@ -56,9 +56,7 @@ def firehose_exists(firehose_name):
     """
 
     # Try to get the description of the Firehose
-    if get_firehose_arn(firehose_name) is None:
-        return False
-    return True
+    return get_firehose_arn(firehose_name) is not None
 
 
 def get_iam_role_arn(iam_role_name):
@@ -86,9 +84,7 @@ def iam_role_exists(iam_role_name):
     """
 
     # Try to retrieve information about the role
-    if get_iam_role_arn(iam_role_name) is None:
-        return False
-    return True
+    return get_iam_role_arn(iam_role_name) is not None
 
 
 def create_iam_role_for_firehose_to_s3(iam_role_name, s3_bucket,
@@ -287,15 +283,15 @@ def main():
     # Assign these values before running the program
     # If the specified IAM role does not exist, it will be created
     firehose_name = 'firehose_to_s3_stream'
-    bucket_arn = 'arn:aws:s3:::BUCKET_NAME'
-    iam_role_name = 'firehose_to_s3'
-
     # Set up logging
     logging.basicConfig(level=logging.DEBUG,
                         format='%(levelname)s: %(asctime)s: %(message)s')
 
     # If Firehose doesn't exist, create it
     if not firehose_exists(firehose_name):
+        bucket_arn = 'arn:aws:s3:::BUCKET_NAME'
+        iam_role_name = 'firehose_to_s3'
+
         # Create a Firehose delivery stream to S3. The Firehose will receive
         # data from direct puts.
         firehose_arn = create_firehose_to_s3(firehose_name, bucket_arn, iam_role_name)
@@ -313,7 +309,7 @@ def main():
     firehose_client = boto3.client('firehose')
     with open(test_data_file, 'r') as f:
         logging.info('Putting 20 records into the Firehose one at a time')
-        for i in range(20):
+        for _ in range(20):
             # Read a record of test data
             line = next(f)
 
@@ -327,7 +323,7 @@ def main():
 
         # Put 200 records in a batch
         logging.info('Putting 200 records into the Firehose in a batch')
-        batch = [{'Data': next(f)} for x in range(200)]  # Read 200 records
+        batch = [{'Data': next(f)} for _ in range(200)]
 
         # Put the batch into the Firehose stream
         try:
@@ -337,15 +333,13 @@ def main():
             logging.error(e)
             exit(1)
 
-        # Did any records in the batch not get processed?
-        num_failures = result['FailedPutCount']
         '''
         # Test: Simulate a failed record
         num_failures = 1
         failed_rec_index = 3
         result['RequestResponses'][failed_rec_index]['ErrorCode'] = 404
         '''
-        if num_failures:
+        if num_failures := result['FailedPutCount']:
             # Resend failed records
             logging.info(f'Resending {num_failures} failed records')
             rec_index = 0

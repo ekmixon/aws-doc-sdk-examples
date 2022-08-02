@@ -232,10 +232,9 @@ class TextractExplorer:
             child_list = []
             child_var = tkinter.IntVar()
             indent = 10 * max(0, str(sel_node['frame']).count('frame') - 2)
-            for index, child in enumerate([
-                    n for n in
-                    sel_node['data'].get('Children', [])
-                    if n['BlockType'] in FILTER_MAP[self.block_filter]]):
+            for index, child in enumerate(n for n in
+                            sel_node['data'].get('Children', [])
+                            if n['BlockType'] in FILTER_MAP[self.block_filter]):
                 child_frame = tkinter.Frame(sel_node['frame'])
                 child_radio = tkinter.Radiobutton(
                     sel_node['frame'],
@@ -313,13 +312,19 @@ class TextractExplorer:
                              role that grants permission to publish to the topic.
         :return: The ID of the detection job.
         """
-        if self.block_filter == 'TEXT':
-            job_id = self.textract_wrapper.start_detection_job(
-                bucket_name, obj_name, sns_topic_arn, sns_role_arn)
-        else:
-            job_id = self.textract_wrapper.start_analysis_job(
-                bucket_name, obj_name, [self.block_filter], sns_topic_arn, sns_role_arn)
-        return job_id
+        return (
+            self.textract_wrapper.start_detection_job(
+                bucket_name, obj_name, sns_topic_arn, sns_role_arn
+            )
+            if self.block_filter == 'TEXT'
+            else self.textract_wrapper.start_analysis_job(
+                bucket_name,
+                obj_name,
+                [self.block_filter],
+                sns_topic_arn,
+                sns_role_arn,
+            )
+        )
 
     def render_data_when_thread_ready(self, thread, button, text):
         """

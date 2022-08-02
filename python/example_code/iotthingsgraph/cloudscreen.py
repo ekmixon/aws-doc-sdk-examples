@@ -52,8 +52,15 @@ parser.add_argument("-w", "--websocket", action="store_true", dest="useWebsocket
 parser.add_argument("-id", "--clientId", action="store", dest="clientId", default="basicPubSub",
                     help="Targeted client id")
 #parser.add_argument("-t", "--topic", action="store", dest="topic", default="Screen1/display", help="Targeted topic")
-parser.add_argument("-m", "--mode", action="store", dest="mode", default="subscribe",
-                    help="Operation modes: %s"%str(AllowedActions))
+parser.add_argument(
+    "-m",
+    "--mode",
+    action="store",
+    dest="mode",
+    default="subscribe",
+    help=f"Operation modes: {str(AllowedActions)}",
+)
+
 parser.add_argument("-M", "--message", action="store", dest="message", default=True,
                     help="Message to publish")
 parser.add_argument("-n", "--thingName", action="store", dest="thingName", default="Bot", help="Targeted thing name")
@@ -70,7 +77,10 @@ clientId = args.clientId
 thingName = args.thingName
 
 if args.mode not in AllowedActions:
-    parser.error("Unknown --mode option %s. Must be one of %s" % (args.mode, str(AllowedActions)))
+    parser.error(
+        f"Unknown --mode option {args.mode}. Must be one of {str(AllowedActions)}"
+    )
+
     exit(2)
 
 if args.useWebsocket and args.certificatePath and args.privateKeyPath:
@@ -121,8 +131,8 @@ myAWSIoTMQTTClient.onMessage = customOnMessage
 
 # Connect and subscribe to AWS IoT
 myAWSIoTMQTTClient.connect()
-if args.mode == 'both' or args.mode == 'subscribe':
-    myAWSIoTMQTTClient.subscribe(thingName + "/display", 0, customCallback)
+if args.mode in ['both', 'subscribe']:
+    myAWSIoTMQTTClient.subscribe(f"{thingName}/display", 0, customCallback)
 time.sleep(2)
 
 # Publish to the same topic in a loop forever

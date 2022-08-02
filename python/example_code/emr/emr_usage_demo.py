@@ -250,7 +250,7 @@ def create_security_groups(prefix, ec2_resource):
         raise
 
     groups = {'manager': None, 'worker': None}
-    for group in groups.keys():
+    for group in groups:
         try:
             groups[group] = default_vpc.create_security_group(
                 GroupName=f'{prefix}-{group}', Description=f"EMR {group} group.")
@@ -284,14 +284,15 @@ def delete_security_groups(security_groups):
                 break
             except ClientError as error:
                 max_tries -= 1
-                if max_tries > 0 and \
-                        error.response['Error']['Code'] == 'DependencyViolation':
-                    logger.warning(
-                        "Attempt to delete security group got DependencyViolation. "
-                        "Waiting for 10 seconds to let things propagate.")
-                    time.sleep(10)
-                else:
+                if (
+                    max_tries <= 0
+                    or error.response['Error']['Code'] != 'DependencyViolation'
+                ):
                     raise
+                logger.warning(
+                    "Attempt to delete security group got DependencyViolation. "
+                    "Waiting for 10 seconds to let things propagate.")
+                time.sleep(10)
         logger.info("Deleted security groups %s.", security_groups)
     except ClientError:
         logger.exception("Couldn't delete security groups %s.", security_groups)
@@ -348,10 +349,10 @@ def demo_short_lived_cluster():
     terminates after the step completes.
     """
     print('-'*88)
-    print(f"Welcome to the Amazon EMR short-lived cluster demo.")
+    print("Welcome to the Amazon EMR short-lived cluster demo.")
     print('-'*88)
 
-    prefix = f'demo-short-emr'
+    prefix = 'demo-short-emr'
 
     s3_resource = boto3.resource('s3')
     iam_resource = boto3.resource('iam')
@@ -389,13 +390,14 @@ def demo_short_lived_cluster():
             break
         except ClientError as error:
             max_tries -= 1
-            if max_tries > 0 and \
-                    error.response['Error']['Code'] == 'ValidationException':
-                print("Instance profile is not ready, let's give it more time...")
-                time.sleep(10)
-            else:
+            if (
+                max_tries <= 0
+                or error.response['Error']['Code'] != 'ValidationException'
+            ):
                 raise
 
+            print("Instance profile is not ready, let's give it more time...")
+            time.sleep(10)
     status_poller(
         "Waiting for cluster, this typically takes several minutes...",
         'RUNNING',
@@ -418,15 +420,18 @@ def demo_short_lived_cluster():
 
     # Clean up demo resources (if you want to).
     remove_everything = input(
-            f"Do you want to delete the security roles, groups, and bucket (y/n)? ")
+        "Do you want to delete the security roles, groups, and bucket (y/n)? "
+    )
+
     if remove_everything.lower() == 'y':
         delete_security_groups(security_groups)
         delete_roles([job_flow_role, service_role])
         delete_bucket(bucket)
     else:
         print(
-            f"Remember that objects kept in an Amazon S3 bucket can incur charges"
-            f"against your account.")
+            'Remember that objects kept in an Amazon S3 bucket can incur chargesagainst your account.'
+        )
+
     print("Thanks for watching!")
 
 
@@ -437,7 +442,7 @@ def demo_long_lived_cluster():
     terminated.
     """
     print('-'*88)
-    print(f"Welcome to the Amazon EMR long-lived cluster demo.")
+    print("Welcome to the Amazon EMR long-lived cluster demo.")
     print('-'*88)
 
     prefix = 'demo-long-emr'
@@ -469,12 +474,13 @@ def demo_long_lived_cluster():
             break
         except ClientError as error:
             max_tries -= 1
-            if max_tries > 0 and \
-                    error.response['Error']['Code'] == 'ValidationException':
-                print("Instance profile is not ready, let's give it more time...")
-                time.sleep(10)
-            else:
+            if (
+                max_tries <= 0
+                or error.response['Error']['Code'] != 'ValidationException'
+            ):
                 raise
+            print("Instance profile is not ready, let's give it more time...")
+            time.sleep(10)
     status_poller(
         "Waiting for cluster, this typically takes several minutes...",
         'WAITING',
@@ -499,21 +505,21 @@ def demo_long_lived_cluster():
                 f"would you like to search (enter 'none' when you're done)? ")
             if input_cat.lower() == 'none' or input_cat in categories:
                 break
-            elif input_cat not in categories:
+            else:
                 print(f"Sorry, {input_cat} is not an allowed category!")
         if input_cat.lower() == 'none':
             break
-        else:
-            input_keyword = input("What keyword would you like to search for? ")
-            input_count = input("How many items would you like to list? ")
-            add_top_product_step(
-                input_count, input_cat, input_keyword, cluster_id, bucket, script_key,
-                emr_client)
+        input_keyword = input("What keyword would you like to search for? ")
+        input_count = input("How many items would you like to list? ")
+        add_top_product_step(
+            input_count, input_cat, input_keyword, cluster_id, bucket, script_key,
+            emr_client)
 
     # Clean up demo resources (if you want to).
     remove_everything = input(
-            f"Do you want to terminate the cluster and delete the security roles, "
-            f"groups, bucket, and all of its contents (y/n)? ")
+        'Do you want to terminate the cluster and delete the security roles, groups, bucket, and all of its contents (y/n)? '
+    )
+
     if remove_everything.lower() == 'y':
         emr_basics.terminate_cluster(cluster_id, emr_client)
         status_poller(
@@ -527,8 +533,9 @@ def demo_long_lived_cluster():
         delete_bucket(bucket)
     else:
         print(
-            f"Remember that running Amazon EMR clusters and objects kept in an "
-            f"Amazon S3 bucket can incur charges against your account.")
+            'Remember that running Amazon EMR clusters and objects kept in an Amazon S3 bucket can incur charges against your account.'
+        )
+
     print("Thanks for watching!")
 
 

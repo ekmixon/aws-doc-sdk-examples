@@ -244,8 +244,7 @@ class Storage:
             'value': author_id}]
         sql, columns, params = query('Books', self._tables, where_clauses)
         results = self._run_statement(sql, sql_params=params)
-        output = unpack_query_results(columns, results)
-        return output
+        return unpack_query_results(columns, results)
 
     def add_book(self, book):
         """
@@ -301,8 +300,7 @@ class Storage:
         logger.info("Listing all authors.")
         sql, columns, _ = query('Authors', self._tables)
         results = self._run_statement(sql)
-        output = unpack_query_results(columns, results)
-        return output
+        return unpack_query_results(columns, results)
 
     def get_patrons(self):
         """
@@ -313,8 +311,7 @@ class Storage:
         logger.info("Listing all patrons.")
         sql, columns, _ = query('Patrons', self._tables)
         results = self._run_statement(sql)
-        output = unpack_query_results(columns, results)
-        return output
+        return unpack_query_results(columns, results)
 
     def add_patron(self, patron):
         """

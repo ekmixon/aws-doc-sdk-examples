@@ -57,9 +57,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG,
                         format='%(levelname)s: %(asctime)s: %(message)s')
 
-    # Delete the archive
-    success = delete_archive(test_vault_name, test_archive_id)
-    if success:
+    if success := delete_archive(test_vault_name, test_archive_id):
         logging.info(f'Deleted archive {test_archive_id} from {test_vault_name}')
 
 

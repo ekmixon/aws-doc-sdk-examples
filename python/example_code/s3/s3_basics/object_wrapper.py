@@ -99,10 +99,12 @@ def list_objects(bucket, prefix=None):
     :return: The list of objects.
     """
     try:
-        if not prefix:
-            objects = list(bucket.objects.all())
-        else:
-            objects = list(bucket.objects.filter(Prefix=prefix))
+        objects = (
+            list(bucket.objects.filter(Prefix=prefix))
+            if prefix
+            else list(bucket.objects.all())
+        )
+
         logger.info("Got objects %s from bucket '%s'",
                     [o.key for o in objects], bucket.name)
     except ClientError:
@@ -227,7 +229,7 @@ def put_acl(bucket, object_key, email):
         acl = bucket.Object(object_key).Acl()
         # Putting an ACL overwrites the existing ACL, so append new grants
         # if you want to preserve existing grants.
-        grants = acl.grants if acl.grants else []
+        grants = acl.grants or []
         grants.append({
             'Grantee': {
                 'Type': 'AmazonCustomerByEmail',
@@ -271,8 +273,10 @@ def get_acl(bucket, object_key):
 def usage_demo():
     """Demonstrated ways to use the functions in this module."""
     bucket = bucket_wrapper.create_bucket(
-        'usage-demo-object-wrapper-' + str(uuid.uuid1()),
-        bucket_wrapper.s3_resource.meta.client.meta.region_name)
+        f'usage-demo-object-wrapper-{str(uuid.uuid1())}',
+        bucket_wrapper.s3_resource.meta.client.meta.region_name,
+    )
+
 
     object_key = os.path.split(__file__)[-1]
     put_object(bucket, object_key, __file__)
@@ -284,7 +288,7 @@ def usage_demo():
     for _ in range(10):
         line = random.randint(0, len(lines))
         put_object(bucket, f'line-{line}', bytes(lines[line], 'utf-8'))
-    print(f"Put 10 random lines from this script as objects.")
+    print("Put 10 random lines from this script as objects.")
 
     listed_lines = list_objects(bucket, 'line-')
     print(f"They are: {', '.join(l.key for l in listed_lines)}")
@@ -295,7 +299,7 @@ def usage_demo():
     delete_object(bucket, line_to_delete.key)
     print(f"Deleted object with key {line_to_delete.key}.")
 
-    copy_key = listed_lines[0].key + '-copy'
+    copy_key = f'{listed_lines[0].key}-copy'
     copy_object(bucket, listed_lines[0].key, bucket, copy_key)
     print(f"Made a copy of object {listed_lines[0].key}, named {copy_key}.")
 

@@ -22,20 +22,16 @@ def update_movie(title, year, rating, plot, actors, dynamodb=None):
 
     table = dynamodb.Table('Movies')
 
-    response = table.update_item(
-        Key={
-            'year': year,
-            'title': title
-        },
+    return table.update_item(
+        Key={'year': year, 'title': title},
         UpdateExpression="set info.rating=:r, info.plot=:p, info.actors=:a",
         ExpressionAttributeValues={
             ':r': Decimal(rating),
             ':p': plot,
-            ':a': actors
+            ':a': actors,
         },
-        ReturnValues="UPDATED_NEW"
+        ReturnValues="UPDATED_NEW",
     )
-    return response
 
 
 if __name__ == '__main__':

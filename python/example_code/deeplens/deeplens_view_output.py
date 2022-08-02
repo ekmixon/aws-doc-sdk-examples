@@ -38,7 +38,7 @@ client = greengrasssdk.client('iot-data')
 # The information exchanged between AWS IoT and the AWS Cloud has 
 # a topic and a message body.
 # This is the topic that this code uses to send messages to the Cloud.
-iotTopic = '$aws/things/{}/infer'.format(os.environ['AWS_IOT_THING_NAME'])
+iotTopic = f"$aws/things/{os.environ['AWS_IOT_THING_NAME']}/infer"
 _, frame = awscam.getLastFrame()
 _,jpeg = cv2.imencode('.jpg', frame)
 Write_To_FIFO = True
@@ -74,7 +74,7 @@ def greengrass_infinite_infer_run():
                    18 : 'sofa', 19 : 'train', 20 : 'tvmonitor' })
         results_thread = FIFO_Thread()
         results_thread.start()
-        
+
         # Send a starting message to the AWS IoT console.
         client.publish(topic=iotTopic, payload="Object detection starts now")
 
@@ -85,7 +85,7 @@ def greengrass_infinite_infer_run():
         ret, frame = awscam.getLastFrame()
         if ret == False:
             raise Exception("Failed to get frame from the stream")
-            
+
         yscale = float(frame.shape[0]/input_height)
         xscale = float(frame.shape[1]/input_width)
 
@@ -93,7 +93,7 @@ def greengrass_infinite_infer_run():
         while doInfer:
             # Get a frame from the video stream.
             ret, frame = awscam.getLastFrame()
-            
+
             # If you fail to get a frame, raise an exception.
             if ret == False:
                 raise Exception("Failed to get frame from the stream")
@@ -122,9 +122,9 @@ def greengrass_infinite_infer_run():
             client.publish(topic=iotTopic, payload = label)
             global jpeg
             ret,jpeg = cv2.imencode('.jpg', frame)
-            
+
     except Exception as e:
-        msg = "Test failed: " + str(e)
+        msg = f"Test failed: {str(e)}"
         client.publish(topic=iotTopic, payload=msg)
 
     # Asynchronously schedule this function to be run again in 15 seconds.

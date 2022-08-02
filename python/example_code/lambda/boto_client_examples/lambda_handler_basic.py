@@ -38,5 +38,4 @@ def lambda_handler(event, context):
     result = ACTIONS[event['action']](event['number'])
     logger.info('Calculated result of %s', result)
 
-    response = {'result': result}
-    return response
+    return {'result': result}

@@ -50,8 +50,13 @@ def upload_archive(vault_name, src_data):
             logging.error(e)
             return None
     else:
-        logging.error('Type of ' + str(type(src_data)) +
-                      ' for the argument \'src_data\' is not supported.')
+        logging.error(
+            (
+                f'Type of {str(type(src_data))}'
+                + ' for the argument \'src_data\' is not supported.'
+            )
+        )
+
         return None
 
     glacier = boto3.client('glacier')

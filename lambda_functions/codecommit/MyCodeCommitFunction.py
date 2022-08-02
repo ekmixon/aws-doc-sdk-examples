@@ -31,8 +31,8 @@ codecommit = boto3.client('codecommit')
 def lambda_handler(event, context):
     #Log the updated references from the event
     references = { reference['ref'] for reference in event['Records'][0]['codecommit']['references'] }
-    print("References: "  + str(references))
-    
+    print(f"References: {references}")
+
     #Get the repository from the event and show its git clone URL
     repository = event['Records'][0]['eventSourceARN'].split(':')[5]
     try:
@@ -41,7 +41,10 @@ def lambda_handler(event, context):
         return response['repositoryMetadata']['cloneUrlHttp']
     except Exception as e:
         print(e)
-        print('Error getting repository {}. Make sure it exists and that your repository is in the same region as this function.'.format(repository))
+        print(
+            f'Error getting repository {repository}. Make sure it exists and that your repository is in the same region as this function.'
+        )
+
         raise e
 
 # snippet-end:[codecommit.python.MyCodeCommitFunction.complete]

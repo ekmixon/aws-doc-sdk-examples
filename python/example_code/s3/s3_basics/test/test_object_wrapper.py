@@ -63,7 +63,7 @@ def test_list_objects_empty_bucket(stub_and_patch, make_unique_name, make_bucket
     object_key = make_unique_name('object')
 
     put_keys = []
-    for obj_suffix in range(0, object_count):
+    for obj_suffix in range(object_count):
         key = f"{object_key}-{obj_suffix}"
         data = bytes(f"Test data-{obj_suffix}", 'utf-8')
         stubber.stub_put_object(bucket.name, key)
@@ -122,7 +122,7 @@ def test_delete_objects(stub_and_patch, make_unique_name, make_bucket):
     object_key = make_unique_name('object')
 
     put_keys = []
-    for suffix in range(0, 5):
+    for suffix in range(5):
         put_key = f"{object_key}-{suffix}"
         stubber.stub_put_object(bucket.name, put_key)
         stubber.stub_head_object(bucket.name, put_key)
@@ -137,8 +137,11 @@ def test_delete_objects(stub_and_patch, make_unique_name, make_bucket):
     stubber.stub_list_objects(bucket.name)
 
     response = object_wrapper.delete_objects(bucket, delete_keys)
-    assert set(delete_keys) == set(obj['Key'] for obj in response['Deleted'])
-    assert set(keep_keys) == set(obj.key for obj in object_wrapper.list_objects(bucket))
+    assert set(delete_keys) == {obj['Key'] for obj in response['Deleted']}
+    assert set(keep_keys) == {
+        obj.key for obj in object_wrapper.list_objects(bucket)
+    }
+
 
     object_wrapper.empty_bucket(bucket)
 

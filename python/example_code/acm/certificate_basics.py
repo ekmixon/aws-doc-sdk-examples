@@ -299,14 +299,14 @@ def usage_demo():
     print(f"Started validation, got certificate ARN: {certificate_arn}.")
 
     import_cert_arn = None
-    cert_file_name = input(
+    if cert_file_name := input(
         "Enter the file name for a self-signed certificate in PEM format. "
-        "This certificate will be imported to ACM. Press Enter to skip: ")
-    if cert_file_name:
-        pk_file_name = input(
+        "This certificate will be imported to ACM. Press Enter to skip: "
+    ):
+        if pk_file_name := input(
             "Enter the file name for the unencrypted private key of the certificate. "
-            "This file must also be in PEM format: ")
-        if pk_file_name:
+            "This file must also be in PEM format: "
+        ):
             with open(cert_file_name, 'rb') as cert_file:
                 import_cert = cert_file.read()
             with open(pk_file_name, 'rb') as pk_file:

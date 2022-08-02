@@ -35,7 +35,7 @@ def exponential_retry(error_code, error_message=None):
                             "Got %s. Sleeping for %s and retrying.", error_code,
                             sleepy_time)
                         time.sleep(sleepy_time)
-                        sleepy_time = sleepy_time*2
+                        sleepy_time *= 2
                     else:
                         logger.exception(
                             "%s raised an error and cannot be retried.", func.__name__)
@@ -44,5 +44,7 @@ def exponential_retry(error_code, error_message=None):
                 raise MaxRetriesExceededError(
                     f"{func.__name__} exceeded the allowable number of retries.")
             return func_return
+
         return wrapper_retry
+
     return decorator_retry

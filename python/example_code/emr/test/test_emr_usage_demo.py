@@ -122,8 +122,10 @@ def test_create_roles(
         with pytest.raises(ClientError) as exc_info:
             emr_usage_demo.create_roles(
                 job_flow_role_name, service_role_name, iam_resource)
-        assert (exc_info.value.response['Error']['Code'] == error_code_jf or
-                exc_info.value.response['Error']['Code'] == error_code_svc)
+        assert exc_info.value.response['Error']['Code'] in [
+            error_code_jf,
+            error_code_svc,
+        ]
 
 
 @pytest.mark.parametrize('error_code,stop_on_method', [
@@ -238,10 +240,12 @@ def test_delete_security_groups_dependency_violation(make_stubber, monkeypatch):
     ec2_resource = boto3.resource('ec2')
     ec2_stubber = make_stubber(ec2_resource.meta.client)
     sec_group_info = {
-        'sg': ec2_resource.SecurityGroup(f'sg-test'),
-        'id': f'sg-test',
+        'sg': ec2_resource.SecurityGroup('sg-test'),
+        'id': 'sg-test',
         'ip_permissions': [],
-        'group_name': f'test-test'}
+        'group_name': 'test-test',
+    }
+
 
     monkeypatch.setattr(time, 'sleep', lambda x: None)
 

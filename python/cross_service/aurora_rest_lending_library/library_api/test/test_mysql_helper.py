@@ -11,22 +11,43 @@ import chalicelib.mysql_helper as mysql_helper
 
 
 def make_table():
-    table = Table('Test', [
-        Column('TestID', int, nullable=False, auto_increment=True, primary_key=True),
-        Column('FirstName', str),
-        Column('LastName', str),
-        Column('Birthday', datetime.date, nullable=False),
-        Column('ForeignID', int, foreign_key=ForeignKey('OtherTable', 'OtherID'))
-    ])
-    return table
+    return Table(
+        'Test',
+        [
+            Column(
+                'TestID',
+                int,
+                nullable=False,
+                auto_increment=True,
+                primary_key=True,
+            ),
+            Column('FirstName', str),
+            Column('LastName', str),
+            Column('Birthday', datetime.date, nullable=False),
+            Column(
+                'ForeignID',
+                int,
+                foreign_key=ForeignKey('OtherTable', 'OtherID'),
+            ),
+        ],
+    )
 
 
 def make_foreign_table():
-    table = Table('OtherTable', [
-        Column('OtherID', int, nullable=False, auto_increment=True, primary_key=True),
-        Column('OtherField', str),
-        Column('ThirdCol', float)])
-    return table
+    return Table(
+        'OtherTable',
+        [
+            Column(
+                'OtherID',
+                int,
+                nullable=False,
+                auto_increment=True,
+                primary_key=True,
+            ),
+            Column('OtherField', str),
+            Column('ThirdCol', float),
+        ],
+    )
 
 
 def test_create_table():

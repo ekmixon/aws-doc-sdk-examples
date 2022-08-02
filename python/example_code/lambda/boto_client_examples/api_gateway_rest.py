@@ -121,9 +121,13 @@ def create_rest_api(
         f'{account_id}:{api_id}/*/*/{api_base_path}'
     try:
         lambda_client.add_permission(
-            FunctionName=lambda_function_arn, StatementId=f'demo-invoke',
-            Action='lambda:InvokeFunction', Principal='apigateway.amazonaws.com',
-            SourceArn=source_arn)
+            FunctionName=lambda_function_arn,
+            StatementId='demo-invoke',
+            Action='lambda:InvokeFunction',
+            Principal='apigateway.amazonaws.com',
+            SourceArn=source_arn,
+        )
+
         logger.info("Granted permission to let Amazon API Gateway invoke function %s "
                     "from %s.", lambda_function_arn, source_arn)
     except ClientError:
@@ -205,7 +209,7 @@ def usage_demo():
     api_url = construct_api_url(
         api_id, apig_client.meta.region_name, api_stage, api_base_path)
     print(f"REST API created, URL is :\n\t{api_url}")
-    print(f"Sleeping for a couple seconds to give AWS time to prepare...")
+    print("Sleeping for a couple seconds to give AWS time to prepare...")
     time.sleep(2)
 
     print(f"Sending some requests to {api_url}...")

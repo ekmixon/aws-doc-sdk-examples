@@ -128,7 +128,7 @@ def find_domain_zone_matches(domains, zones):
         # Start at the most specific sub-domain and walk up to the root domain until a
         # zone match is found.
         domain_split = domain.split('.')
-        for index in range(0, len(domain_split) - 1):
+        for index in range(len(domain_split) - 1):
             sub_domain = '.'.join(domain_split[index:])
             for zone in zones:
                 # Normalize the zone name from Route 53 by removing the trailing '.'.

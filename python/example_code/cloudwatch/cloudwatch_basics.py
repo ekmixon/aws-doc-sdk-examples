@@ -265,7 +265,7 @@ def usage_demo():
     start = datetime.utcnow() - timedelta(minutes=minutes)
     print(f"Putting data into metric {metric_namespace}.{metric_name} spanning the "
           f"last {minutes} minutes.")
-    for offset in range(0, minutes):
+    for offset in range(minutes):
         stamp = start + timedelta(minutes=offset)
         cw_wrapper.put_metric_data_set(
             metric_namespace, metric_name, stamp, 'Count', {

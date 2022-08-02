@@ -20,19 +20,18 @@ class TestFunction(unittest.TestCase):
 
   def test_function(self):
     xray_recorder.begin_segment('test_function')
-    file = open('event.json', 'rb')
-    try:
-      ba = bytearray(file.read())
-      event = jsonpickle.decode(ba)
-      logger.warning('## EVENT')
-      logger.warning(jsonpickle.encode(event))
-      context = {'requestid' : '1234'}
-      result = handler(event, context)
-      print(str(result))
-      self.assertRegex(str(result), 'FunctionCount', 'Should match')
-    finally:
-      file.close()
-    file.close()
+    with open('event.json', 'rb') as file:
+      try:
+        ba = bytearray(file.read())
+        event = jsonpickle.decode(ba)
+        logger.warning('## EVENT')
+        logger.warning(jsonpickle.encode(event))
+        context = {'requestid' : '1234'}
+        result = handler(event, context)
+        print(result)
+        self.assertRegex(str(result), 'FunctionCount', 'Should match')
+      finally:
+        file.close()
     xray_recorder.end_segment()
 
 if __name__ == '__main__':

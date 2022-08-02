@@ -21,13 +21,12 @@ STREAM_NAME = "ExampleInputStream"
 
 
 def get_hotspot(field, spot_size):
-    hotspot = {
+    return {
         'left': field['left'] + random.random() * (field['width'] - spot_size),
         'width': spot_size,
         'top': field['top'] + random.random() * (field['height'] - spot_size),
-        'height': spot_size
+        'height': spot_size,
     }
-    return hotspot
 
 
 def get_record(field, hotspot, hotspot_weight):

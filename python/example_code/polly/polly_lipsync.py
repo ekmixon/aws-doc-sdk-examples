@@ -256,13 +256,13 @@ class PollyMouth:
                 True)
         except ClientError as error:
             if error.response['Error']['Code'] == 'TextLengthExceededException':
-                bucket_name = tkinter.simpledialog.askstring(
+                if bucket_name := tkinter.simpledialog.askstring(
                     "Text too long",
                     "The text is too long for synchronous synthesis. To start an\n"
                     "asynchronous job, enter the name of an existing Amazon S3\n"
                     "bucket to use for speech synthesis output and click OK.",
-                    parent=self.app)
-                if bucket_name:
+                    parent=self.app,
+                ):
                     audio_stream, visemes = self.polly_wrapper.do_synthesis_task(
                         self.sayit_txt.get(1.0, tkinter.END),
                         self.engine_var.get(),
@@ -277,7 +277,7 @@ class PollyMouth:
 
         if audio_stream is not None:
             with TemporaryDirectory() as tempdir:
-                speech_file_name = tempdir + '/speech.mp3'
+                speech_file_name = f'{tempdir}/speech.mp3'
                 with open(speech_file_name, 'wb') as speech_file:
                     speech_file.write(audio_stream.read())
                 silence = '.media/silence.mp3'

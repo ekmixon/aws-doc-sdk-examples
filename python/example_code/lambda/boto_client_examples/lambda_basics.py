@@ -39,13 +39,12 @@ def exponential_retry(func, error_code, *func_args, **func_kwargs):
             func_return = func(*func_args, **func_kwargs)
             logger.info("Ran %s, got %s.", func.__name__, func_return)
         except ClientError as error:
-            if error.response['Error']['Code'] == error_code:
-                print(f"Sleeping for {sleepy_time} to give AWS time to "
-                      f"connect resources.")
-                time.sleep(sleepy_time)
-                sleepy_time = sleepy_time*2
-            else:
+            if error.response['Error']['Code'] != error_code:
                 raise
+            print(f"Sleeping for {sleepy_time} to give AWS time to "
+                  f"connect resources.")
+            time.sleep(sleepy_time)
+            sleepy_time *= 2
     return func_return
 
 
@@ -135,8 +134,12 @@ def deploy_lambda_function(
             Code={'ZipFile': deployment_package},
             Publish=True)
         function_arn = response['FunctionArn']
-        logger.info("Created function '%s' with ARN: '%s'.",
-                    function_name, response['FunctionArn'])
+        logger.info(
+            "Created function '%s' with ARN: '%s'.",
+            function_name,
+            function_arn,
+        )
+
     except ClientError:
         logger.exception("Couldn't create function %s.", function_name)
         raise

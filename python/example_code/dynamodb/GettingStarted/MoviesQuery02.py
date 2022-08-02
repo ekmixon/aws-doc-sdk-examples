@@ -23,7 +23,7 @@ def query_and_project_movies(year, title_range, dynamodb=None):
         dynamodb = boto3.resource('dynamodb', endpoint_url="http://localhost:8000")
 
     table = dynamodb.Table('Movies')
-    print(f"Get year, title, genres, and lead actor")
+    print("Get year, title, genres, and lead actor")
 
     # Expression attribute names can only reference items in the projection expression.
     response = table.query(

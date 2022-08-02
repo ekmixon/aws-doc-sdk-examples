@@ -108,8 +108,7 @@ class TextractWrapper:
         status = None
         try:
             queue = self.sqs_resource.Queue(queue_url)
-            messages = queue.receive_messages()
-            if messages:
+            if messages := queue.receive_messages():
                 msg_body = json.loads(messages[0].body)
                 msg = json.loads(msg_body['Message'])
                 if msg.get('JobId') == job_id:

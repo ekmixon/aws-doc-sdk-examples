@@ -53,6 +53,6 @@ def handler(event, context):
     if operation in operations:
         return operations[operation](event.get('payload'))
     else:
-        raise ValueError('Unrecognized operation "{}"'.format(operation))
+        raise ValueError(f'Unrecognized operation "{operation}"')
 
 # snippet-end:[lambda.python.apigateway-microservice.KD47G6EL]

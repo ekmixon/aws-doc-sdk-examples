@@ -112,9 +112,9 @@ def test_get_buckets(stub_and_patch, make_unique_name, make_bucket):
     """Test getting a list of buckets."""
     stubber = stub_and_patch(bucket_wrapper, 'get_s3')
     created_buckets = [
-        make_bucket(stubber, bucket_wrapper.get_s3())
-        for ind in range(0, 5)
+        make_bucket(stubber, bucket_wrapper.get_s3()) for _ in range(5)
     ]
+
 
     stubber.stub_list_buckets(created_buckets)
 

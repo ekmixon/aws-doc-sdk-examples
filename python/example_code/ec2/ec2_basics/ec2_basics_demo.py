@@ -68,7 +68,7 @@ def setup_demo(current_ip_address, ami_image_id, key_file_name):
     elastic_ip = ec2_instance_management.allocate_elastic_ip()
     print(f"Allocated static Elastic IP address: {elastic_ip.public_ip}.")
 
-    print(f"Waiting for instances to start...")
+    print("Waiting for instances to start...")
     ssh_instance.wait_until_running()
     print(f"Instance {ssh_instance.instance_id} is running.")
 
@@ -111,7 +111,7 @@ def management_demo(ssh_instance, no_ssh_instance, key_file_name, elastic_ip):
     ec2_instance_management.associate_elastic_ip(
         elastic_ip.allocation_id, ssh_instance.instance_id)
     print(f"Associated the Elastic IP with instance {ssh_instance.instance_id}.")
-    print(f"You can now SSH to the instance at another command prompt by running")
+    print("You can now SSH to the instance at another command prompt by running")
     print(f"\t'ssh -i {key_file_name} ec2-user@{elastic_ip.public_ip}'")
     input("Press Enter when you're ready to continue the demo.")
 
@@ -214,10 +214,11 @@ def run_demos():
     ssm = boto3.client('ssm')
     ami_params = ssm.get_parameters_by_path(
         Path='/aws/service/ami-amazon-linux-latest')
-    amzn2_amis = [ap for ap in ami_params['Parameters'] if
-                  all(query in ap['Name'] for query
-                      in ('amzn2', 'x86_64', 'gp2'))]
-    if len(amzn2_amis) > 0:
+    if amzn2_amis := [
+        ap
+        for ap in ami_params['Parameters']
+        if all(query in ap['Name'] for query in ('amzn2', 'x86_64', 'gp2'))
+    ]:
         ami_image_id = amzn2_amis[0]['Value']
         print("Found an Amazon Machine Image (AMI) that includes Amazon Linux 2, "
               "an x64 architecture, and a general-purpose EBS volume.")

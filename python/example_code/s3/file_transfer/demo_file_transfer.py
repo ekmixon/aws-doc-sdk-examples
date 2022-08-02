@@ -159,9 +159,9 @@ class TransferDemoManager:
         if platform.system() == "Windows":
             self._create_file_cmd = "fsutil file createnew {} {}"
             self._size_multiplier = MB
-        elif platform.system() == "Linux" or platform.system() == "Darwin":
+        elif platform.system() in ["Linux", "Darwin"]:
             self._create_file_cmd = f"dd if=/dev/urandom of={{}} " \
-                                    f"bs={MB} count={{}}"
+                                        f"bs={MB} count={{}}"
             self._size_multiplier = 1
         else:
             raise EnvironmentError(

@@ -97,10 +97,7 @@ class CustomWaiter:
         """
         status = parsed
         for key in self.argument.split('.'):
-            if key.endswith('[]'):
-                status = status.get(key[:-2])[0]
-            else:
-                status = status.get(key)
+            status = status.get(key[:-2])[0] if key.endswith('[]') else status.get(key)
         logger.info(
             "Waiter %s called %s, got %s.", self.name, self.operation, status)
 

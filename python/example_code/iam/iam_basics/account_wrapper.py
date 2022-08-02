@@ -160,7 +160,7 @@ def usage_demo():
     current_aliases = list_aliases()
     print(f"Your account alias is now {current_aliases}.")
     delete_alias(current_aliases[0])
-    print(f"Your account now has no alias.")
+    print("Your account now has no alias.")
     if len(old_aliases) > 0:
         print(f"Restoring your original alias back to {old_aliases[0]}...")
         create_alias(old_aliases[0])
@@ -185,7 +185,7 @@ def usage_demo():
     print(f"Got credentials report. Showing only the first {col_count} columns.")
     cred_lines = [line.split(',')[:col_count] for line
                   in cred_report.decode('utf-8').split('\n')]
-    col_width = max([len(item) for line in cred_lines for item in line]) + 2
+    col_width = max(len(item) for line in cred_lines for item in line) + 2
     for line in cred_report.decode('utf-8').split('\n'):
         print(''.join(element.ljust(col_width)
                       for element in line.split(',')[:col_count]))

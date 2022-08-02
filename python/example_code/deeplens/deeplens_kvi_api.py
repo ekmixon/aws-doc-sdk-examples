@@ -21,7 +21,7 @@ import greengrasssdk
 def greengrass_hello_world_run():
     # Create the green grass client so that we can send messages to IoT console
     client = greengrasssdk.client('iot-data')
-    iot_topic = '$aws/things/{}/infer'.format(os.environ['AWS_IOT_THING_NAME'])
+    iot_topic = f"$aws/things/{os.environ['AWS_IOT_THING_NAME']}/infer"
 
     # Stream configuration, name and retention
     # Note that the name will appear as deeplens-myStream
@@ -39,7 +39,7 @@ def greengrass_hello_world_run():
     producer = dkv.createProducer(creds.access_key, creds.secret_key, creds.token, "us-east-1")
     client.publish(topic=iot_topic, payload="Producer created")
     kvs_stream = producer.createStream(stream_name, retention)
-    client.publish(topic=iot_topic, payload="Stream {} created".format(stream_name))
+    client.publish(topic=iot_topic, payload=f"Stream {stream_name} created")
 
     # Start putting data into the KVS stream
     kvs_stream.start()

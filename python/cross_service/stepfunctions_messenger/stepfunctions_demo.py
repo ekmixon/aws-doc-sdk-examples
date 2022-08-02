@@ -100,11 +100,8 @@ def usage_demo(state_machine_name, resources):
 
     print("Stop the state machine.")
     state_machine.stop_run(run_arn, "Stop to update for demo.")
-    runs = state_machine.list_runs('RUNNING')
-    while runs:
+    while runs := state_machine.list_runs('RUNNING'):
         time.sleep(5)
-        runs = state_machine.list_runs('RUNNING')
-
     print("Update the state machine so it sends messages to Amazon SQS.")
     definition = make_definition(resources, True)
     state_machine.update(definition)

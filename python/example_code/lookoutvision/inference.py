@@ -87,7 +87,7 @@ class Inference:
             local_file = os.path.basename(photo)
         except ValueError as err:
             logger.info("Couldn't get S3 info for %s: %s", photo, format(err))
-            raise ValueError("Couldn't get S3 info for {}.".format(photo)) from err
+            raise ValueError(f"Couldn't get S3 info for {photo}.") from err
 
         try:
             logger.info("Downloading %s", photo)
@@ -135,7 +135,7 @@ def main():
         add_arguments(parser)
 
         args = parser.parse_args()
-        print("Analyzing " + args.image)
+        print(f"Analyzing {args.image}")
 
         photo = args.image
         if args.image.startswith("s3://"):
@@ -150,10 +150,7 @@ def main():
         if args.image.startswith("s3://"):
             os.remove(photo)
 
-        state = "anomalous"
-        if anomalous is False:
-            state = "normal"
-
+        state = "normal" if anomalous is False else "anomalous"
         print(
             f"Your model is {confidence:.0%} confident that the image is {state}."
         )
@@ -163,7 +160,7 @@ def main():
     except FileNotFoundError as err:
         print("The supplied file couldn't be found: " + err.filename)
     except ValueError as err:
-        print("A value error occured. " + format(err))
+        print(f"A value error occured. {format(err)}")
     else:
         print("Successfully completed analysis.")
 

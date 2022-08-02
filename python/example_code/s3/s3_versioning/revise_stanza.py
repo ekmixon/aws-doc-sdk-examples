@@ -54,9 +54,7 @@ def lambda_handler(event, context):
             stanza = stanza.upper()
         elif revision == 'reverse':
             stanza = stanza[::-1]
-        elif revision == 'delete':
-            pass
-        else:
+        elif revision != 'delete':
             raise TypeError(f"Can't handle revision type '{revision}'.")
 
         if revision == 'delete':

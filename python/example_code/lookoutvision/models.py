@@ -55,12 +55,7 @@ class Models:
                 "S3Location": {"Bucket": output_bucket, "Prefix": output_folder}
             }
 
-            # Add tag, if defined.
-            tags = []
-
-            if tag_key is not None:
-                tags = [{"Key": tag_key, "Value": tag_key_value}]
-
+            tags = [] if tag_key is None else [{"Key": tag_key, "Value": tag_key_value}]
             # Create the model.
             response = lookoutvision_client.create_model(
                 ProjectName=project_name, OutputConfig=output_config, Tags=tags
@@ -74,7 +69,7 @@ class Models:
 
             # Wait until training completes.
             finished = False
-            while finished is False:
+            while not finished:
                 model_description = lookoutvision_client.describe_model(
                     ProjectName=project_name,
                     ModelVersion=response["ModelMetadata"]["ModelVersion"],
@@ -101,7 +96,7 @@ class Models:
             return status, response["ModelMetadata"]["ModelVersion"]
 
         except ClientError as err:
-            print("Service error: " + format(err))
+            print(f"Service error: {format(err)}")
             raise
 
     @staticmethod
@@ -159,7 +154,7 @@ class Models:
 
             # list models
             response = lookoutvision_client.list_models(ProjectName=project_name)
-            print("Project: " + project_name)
+            print(f"Project: {project_name}")
             for model in response["Models"]:
 
                 Models.describe_model(
@@ -193,13 +188,13 @@ class Models:
             model_exists = True
 
             while model_exists:
-                model_exists = False
                 response = lookoutvision_client.list_models(ProjectName=project_name)
-                for model in response["Models"]:
-                    if model["ModelVersion"] == model_version:
-                        model_exists = True
+                model_exists = any(
+                    model["ModelVersion"] == model_version
+                    for model in response["Models"]
+                )
 
-                if model_exists is False:
+                if not model_exists:
                     logger.info("Model deleted")
                 else:
                     logger.info("Model is being deleted...")

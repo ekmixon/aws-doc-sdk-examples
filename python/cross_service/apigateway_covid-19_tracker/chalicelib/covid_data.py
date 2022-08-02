@@ -121,8 +121,7 @@ class Storage:
         :return: The retrieved record, or None if no record exists.
         """
         response = self._table.get_item(Key={'state': state, 'date': date})
-        item = response.get('Item', None)
-        return item
+        return response.get('Item', None)
 
     def delete_state_date_data(self, state, date):
         """

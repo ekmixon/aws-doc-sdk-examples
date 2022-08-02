@@ -55,9 +55,9 @@ def make_definition(resources, include_sqs):
 
     map_states = state_record_sent
     if include_sqs:
-        map_states.update(state_send_to_sqs)
+        map_states |= state_send_to_sqs
 
-    definition = {
+    return {
         "Comment": "Read messages from DynamoDB in a loop.",
         "StartAt": "Scan DynamoDB For Messages",
         "TimeoutSeconds": 3600,
@@ -66,19 +66,23 @@ def make_definition(resources, include_sqs):
                 "Type": "Task",
                 "Resource": resources["ScanFunctionArn"],
                 "ResultPath": "$.List",
-                "Next": "Send Messages"},
+                "Next": "Send Messages",
+            },
             "Send Messages": {
                 "Type": "Map",
                 "ItemsPath": "$.List",
                 "Iterator": {
                     "StartAt": "Send" if include_sqs else "Record Sent",
-                    "States": map_states},
+                    "States": map_states,
+                },
                 "ResultPath": None,
-                "Next": "Pause Then Loop"},
+                "Next": "Pause Then Loop",
+            },
             "Pause Then Loop": {
                 "InputPath": None,
                 "Type": "Wait",
                 "Seconds": 10,
-                "Next": "Scan DynamoDB For Messages"}}}
-
-    return definition
+                "Next": "Scan DynamoDB For Messages",
+            },
+        },
+    }

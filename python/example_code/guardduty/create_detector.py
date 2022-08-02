@@ -28,10 +28,10 @@ gd = boto3.client(
 detector=gd.list_detectors()
 if len(detector['DetectorIds']) > 0:
     detector_id = detector['DetectorIds'][0]
-    print('Detector exists in Region ' + region + ' Detector Id: ' + detector_id)
+    print(f'Detector exists in Region {region} Detector Id: {detector_id}')
 else:
-    print('GuardDuty Detector does not exist in Region ' + region)
-    print('Creating Detector in ' + region + ' ...')
+    print(f'GuardDuty Detector does not exist in Region {region}')
+    print(f'Creating Detector in {region} ...')
     create_detector(gd)
 
 # snippet-end:[guardduty.python.create_detector.complete]

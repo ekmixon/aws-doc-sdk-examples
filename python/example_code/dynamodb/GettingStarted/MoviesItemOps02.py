@@ -29,8 +29,10 @@ def get_movie(title, year, dynamodb=None):
 
 
 if __name__ == '__main__':
-    movie = get_movie("The Big New Movie", 2015,)
-    if movie:
+    if movie := get_movie(
+        "The Big New Movie",
+        2015,
+    ):
         print("Get movie succeeded:")
         pprint(movie, sort_dicts=False)
 # snippet-end:[dynamodb.python.codeexample.MoviesItemOps02]

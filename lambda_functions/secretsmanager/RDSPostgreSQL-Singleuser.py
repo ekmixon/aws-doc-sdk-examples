@@ -68,18 +68,33 @@ def lambda_handler(event, context):
     # Make sure the version is staged correctly
     metadata = service_client.describe_secret(SecretId=arn)
     if "RotationEnabled" in metadata and not metadata['RotationEnabled']:
-        logger.error("Secret %s is not enabled for rotation" % arn)
-        raise ValueError("Secret %s is not enabled for rotation" % arn)
+        logger.error(f"Secret {arn} is not enabled for rotation")
+        raise ValueError(f"Secret {arn} is not enabled for rotation")
     versions = metadata['VersionIdsToStages']
     if token not in versions:
-        logger.error("Secret version %s has no stage for rotation of secret %s." % (token, arn))
-        raise ValueError("Secret version %s has no stage for rotation of secret %s." % (token, arn))
+        logger.error(
+            f"Secret version {token} has no stage for rotation of secret {arn}."
+        )
+
+        raise ValueError(
+            f"Secret version {token} has no stage for rotation of secret {arn}."
+        )
+
     if "AWSCURRENT" in versions[token]:
-        logger.info("Secret version %s already set as AWSCURRENT for secret %s." % (token, arn))
+        logger.info(
+            f"Secret version {token} already set as AWSCURRENT for secret {arn}."
+        )
+
         return
     elif "AWSPENDING" not in versions[token]:
-        logger.error("Secret version %s not set as AWSPENDING for rotation of secret %s." % (token, arn))
-        raise ValueError("Secret version %s not set as AWSPENDING for rotation of secret %s." % (token, arn))
+        logger.error(
+            f"Secret version {token} not set as AWSPENDING for rotation of secret {arn}."
+        )
+
+        raise ValueError(
+            f"Secret version {token} not set as AWSPENDING for rotation of secret {arn}."
+        )
+
 
     # Call the appropriate step
     if step == "createSecret":
@@ -95,8 +110,8 @@ def lambda_handler(event, context):
         finish_secret(service_client, arn, token)
 
     else:
-        logger.error("lambda_handler: Invalid step parameter %s for secret %s" % (step, arn))
-        raise ValueError("Invalid step parameter %s for secret %s" % (step, arn))
+        logger.error(f"lambda_handler: Invalid step parameter {step} for secret {arn}")
+        raise ValueError(f"Invalid step parameter {step} for secret {arn}")
 
 
 def create_secret(service_client, arn, token):
@@ -124,7 +139,7 @@ def create_secret(service_client, arn, token):
     # Now try to get the secret version, if that fails, put a new secret
     try:
         get_secret_dict(service_client, arn, "AWSPENDING", token)
-        logger.info("createSecret: Successfully retrieved secret for %s." % arn)
+        logger.info(f"createSecret: Successfully retrieved secret for {arn}.")
     except service_client.exceptions.ResourceNotFoundException:
         # Generate a random password
         passwd = service_client.get_random_password(ExcludeCharacters='/@"\'\\')
@@ -132,7 +147,9 @@ def create_secret(service_client, arn, token):
 
         # Put the secret
         service_client.put_secret_value(SecretId=arn, ClientRequestToken=token, SecretString=json.dumps(current_dict), VersionStages=['AWSPENDING'])
-        logger.info("createSecret: Successfully put secret for ARN %s and version %s." % (arn, token))
+        logger.info(
+            f"createSecret: Successfully put secret for ARN {arn} and version {token}."
+        )
 
 
 def set_secret(service_client, arn, token):
@@ -162,7 +179,10 @@ def set_secret(service_client, arn, token):
     conn = get_connection(pending_dict)
     if conn:
         conn.close()
-        logger.info("setSecret: AWSPENDING secret is already set as password in PostgreSQL DB for secret arn %s." % arn)
+        logger.info(
+            f"setSecret: AWSPENDING secret is already set as password in PostgreSQL DB for secret arn {arn}."
+        )
+
         return
 
     # Now try the current password
@@ -176,16 +196,25 @@ def set_secret(service_client, arn, token):
 
     # If we still don't have a connection, raise a ValueError
     if not conn:
-        logger.error("setSecret: Unable to log into database with previous, current, or pending secret of secret arn %s" % arn)
-        raise ValueError("Unable to log into database with previous, current, or pending secret of secret arn %s" % arn)
+        logger.error(
+            f"setSecret: Unable to log into database with previous, current, or pending secret of secret arn {arn}"
+        )
+
+        raise ValueError(
+            f"Unable to log into database with previous, current, or pending secret of secret arn {arn}"
+        )
+
 
     # Now set the password to the pending password
     try:
         with conn.cursor() as cur:
-            alter_role = "ALTER USER %s" % pending_dict['username']
-            cur.execute(alter_role + " WITH PASSWORD %s", (pending_dict['password'],))
+            alter_role = f"ALTER USER {pending_dict['username']}"
+            cur.execute(f"{alter_role} WITH PASSWORD %s", (pending_dict['password'],))
             conn.commit()
-            logger.info("setSecret: Successfully set password for user %s in PostgreSQL DB for secret arn %s." % (pending_dict['username'], arn))
+            logger.info(
+                f"setSecret: Successfully set password for user {pending_dict['username']} in PostgreSQL DB for secret arn {arn}."
+            )
+
     finally:
         conn.close()
 
@@ -211,9 +240,9 @@ def test_secret(service_client, arn, token):
         KeyError: If the secret json does not contain the expected keys
 
     """
-    # Try to login with the pending secret, if it succeeds, return
-    conn = get_connection(get_secret_dict(service_client, arn, "AWSPENDING", token))
-    if conn:
+    if conn := get_connection(
+        get_secret_dict(service_client, arn, "AWSPENDING", token)
+    ):
         # This is where the lambda will validate the user's permissions. Uncomment/modify the below lines to
         # tailor these validations to your needs
         try:
@@ -223,11 +252,19 @@ def test_secret(service_client, arn, token):
         finally:
             conn.close()
 
-        logger.info("testSecret: Successfully signed into PostgreSQL DB with AWSPENDING secret in %s." % arn)
+        logger.info(
+            f"testSecret: Successfully signed into PostgreSQL DB with AWSPENDING secret in {arn}."
+        )
+
         return
     else:
-        logger.error("testSecret: Unable to log into database with pending secret of secret ARN %s" % arn)
-        raise ValueError("Unable to log into database with pending secret of secret ARN %s" % arn)
+        logger.error(
+            f"testSecret: Unable to log into database with pending secret of secret ARN {arn}"
+        )
+
+        raise ValueError(
+            f"Unable to log into database with pending secret of secret ARN {arn}"
+        )
 
 
 def finish_secret(service_client, arn, token):
@@ -250,14 +287,19 @@ def finish_secret(service_client, arn, token):
         if "AWSCURRENT" in metadata["VersionIdsToStages"][version]:
             if version == token:
                 # The correct version is already marked as current, return
-                logger.info("finishSecret: Version %s already marked as AWSCURRENT for %s" % (version, arn))
+                logger.info(
+                    f"finishSecret: Version {version} already marked as AWSCURRENT for {arn}"
+                )
+
                 return
             current_version = version
             break
 
     # Finalize by staging the secret version current
     service_client.update_secret_version_stage(SecretId=arn, VersionStage="AWSCURRENT", MoveToVersionId=token, RemoveFromVersionId=current_version)
-    logger.info("finishSecret: Successfully set AWSCURRENT stage to version %s for secret %s." % (version, arn))
+    logger.info(
+        f"finishSecret: Successfully set AWSCURRENT stage to version {version} for secret {arn}."
+    )
 
 
 def get_connection(secret_dict):
@@ -282,8 +324,15 @@ def get_connection(secret_dict):
 
     # Try to obtain a connection to the db
     try:
-        conn = pgdb.connect(host=secret_dict['host'], user=secret_dict['username'], password=secret_dict['password'], database=dbname, port=port, connect_timeout=5)
-        return conn
+        return pgdb.connect(
+            host=secret_dict['host'],
+            user=secret_dict['username'],
+            password=secret_dict['password'],
+            database=dbname,
+            port=port,
+            connect_timeout=5,
+        )
+
     except pg.InternalError:
         return None
 
@@ -326,7 +375,7 @@ def get_secret_dict(service_client, arn, stage, token=None):
         raise KeyError("Database engine must be set to 'postgres' in order to use this rotation lambda")
     for field in required_fields:
         if field not in secret_dict:
-            raise KeyError("%s key is missing from secret JSON" % field)
+            raise KeyError(f"{field} key is missing from secret JSON")
 
     # Parse and return the secret JSON string
     return secret_dict

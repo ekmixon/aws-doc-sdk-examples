@@ -27,5 +27,5 @@ def function_handler(event, context):
     message = (f'Failed to retrieve secret {secret_name}.' if secret_value is None else
                f'Successfully retrieved secret {secret_name}.')
     iot_client.publish(topic=send_topic, payload=message)
-    print('Published: ' + message)
+    print(f'Published: {message}')
 # snippet-end:[greengrass.python.secret-resource-access.complete]

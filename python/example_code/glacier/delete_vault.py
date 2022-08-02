@@ -54,9 +54,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG,
                         format='%(levelname)s: %(asctime)s: %(message)s')
 
-    # Delete the vault
-    success = delete_vault(test_vault_name)
-    if success:
+    if success := delete_vault(test_vault_name):
         logging.info(f'Deleted vault {test_vault_name}')
 
 

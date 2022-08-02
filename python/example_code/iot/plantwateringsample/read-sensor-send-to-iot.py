@@ -55,11 +55,10 @@ SHADOW_HANDLER = "MyRPi"
 # Automatically called whenever the shadow is updated.
 def myShadowUpdateCallback(payload, responseStatus, token):
   print()
-  print('UPDATE: $aws/things/' + SHADOW_HANDLER +
-    '/shadow/update/#')
-  print("payload = " + payload)
-  print("responseStatus = " + responseStatus)
-  print("token = " + token)
+  print((f'UPDATE: $aws/things/{SHADOW_HANDLER}' + '/shadow/update/#'))
+  print(f"payload = {payload}")
+  print(f"responseStatus = {responseStatus}")
+  print(f"token = {token}")
 
 # Create, configure, and connect a shadow client.
 myShadowClient = AWSIoTMQTTShadowClient(SHADOW_CLIENT)

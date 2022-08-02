@@ -210,8 +210,7 @@ class SecretsManagerSecret:
             paginator = self.secretsmanager_client.get_paginator('list_secrets')
             for page in paginator.paginate(
                     PaginationConfig={'MaxItems': max_results}):
-                for secret in page['SecretList']:
-                    yield secret
+                yield from page['SecretList']
         except ClientError:
             logger.exception("Couldn't list secrets.")
             raise

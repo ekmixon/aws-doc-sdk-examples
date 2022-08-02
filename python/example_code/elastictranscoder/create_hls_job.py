@@ -82,45 +82,47 @@ def main():
     # Define the various outputs
     outputs = [
         {
-            'Key': 'hlsAudio/' + output_file,
+            'Key': f'hlsAudio/{output_file}',
             'PresetId': hls_64k_audio_preset_id,
             'SegmentDuration': segment_duration,
         },
         {
-            'Key': 'hls0400k/' + output_file,
+            'Key': f'hls0400k/{output_file}',
             'PresetId': hls_0400k_preset_id,
             'SegmentDuration': segment_duration,
         },
         {
-            'Key': 'hls0600k/' + output_file,
+            'Key': f'hls0600k/{output_file}',
             'PresetId': hls_0600k_preset_id,
             'SegmentDuration': segment_duration,
         },
         {
-            'Key': 'hls1000k/' + output_file,
+            'Key': f'hls1000k/{output_file}',
             'PresetId': hls_1000k_preset_id,
             'SegmentDuration': segment_duration,
         },
         {
-            'Key': 'hls1500k/' + output_file,
+            'Key': f'hls1500k/{output_file}',
             'PresetId': hls_1500k_preset_id,
             'SegmentDuration': segment_duration,
         },
         {
-            'Key': 'hls2000k/' + output_file,
+            'Key': f'hls2000k/{output_file}',
             'PresetId': hls_2000k_preset_id,
             'SegmentDuration': segment_duration,
         },
     ]
 
+
     # Define the playlist
     playlists = [
         {
-            'Name': 'hls_' + output_file,
+            'Name': f'hls_{output_file}',
             'Format': 'HLSv3',
-            'OutputKeys': [x['Key'] for x in outputs]
+            'OutputKeys': [x['Key'] for x in outputs],
         }
     ]
+
 
     # Create an HLS job in Elastic Transcoder
     job_info = create_elastic_transcoder_hls_job(pipeline_id,

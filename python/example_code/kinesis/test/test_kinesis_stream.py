@@ -18,11 +18,11 @@ def test_create(make_stubber, error_code):
     kinesis_stubber = make_stubber(kinesis_client)
     stream = KinesisStream(kinesis_client)
     stream_name = 'test-stream'
-    stream_arn = f'arn:aws:kinesis:REGION:123456789012:stream/{stream_name}'
     stream_status = 'ACTIVE'
 
     kinesis_stubber.stub_create_stream(stream_name, error_code=error_code)
     if error_code is None:
+        stream_arn = f'arn:aws:kinesis:REGION:123456789012:stream/{stream_name}'
         kinesis_stubber.stub_describe_stream(stream_name, stream_arn, stream_status)
         kinesis_stubber.stub_describe_stream(stream_name, stream_arn, stream_status)
 

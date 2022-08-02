@@ -144,10 +144,11 @@ def test_describe_step(make_stubber, error_code):
     emr_stubber = make_stubber(emr_client)
     cluster_id = 'test-id'
     step = {
-        'Id': f'test-step-id',
-        'Name': f'test-step',
-        'Status': {'State': 'COMPLETED'}
+        'Id': 'test-step-id',
+        'Name': 'test-step',
+        'Status': {'State': 'COMPLETED'},
     }
+
 
     emr_stubber.stub_describe_step(cluster_id, step, error_code=error_code)
 

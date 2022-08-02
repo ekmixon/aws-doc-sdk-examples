@@ -50,8 +50,7 @@ class SesTemplate:
         :return: True when all of the tags in the template data are usable with the
                  template; otherwise, False.
         """
-        diff = set(template_data) - self.template_tags
-        if diff:
+        if diff := set(template_data) - self.template_tags:
             logger.warning(
                 "Template data contains tags that aren't in the template: %s", diff)
             return False

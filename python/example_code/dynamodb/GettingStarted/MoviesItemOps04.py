@@ -22,18 +22,12 @@ def increase_rating(title, year, rating_increase, dynamodb=None):
 
     table = dynamodb.Table('Movies')
 
-    response = table.update_item(
-        Key={
-            'year': year,
-            'title': title
-        },
+    return table.update_item(
+        Key={'year': year, 'title': title},
         UpdateExpression="set info.rating = info.rating + :val",
-        ExpressionAttributeValues={
-            ':val': Decimal(rating_increase)
-        },
-        ReturnValues="UPDATED_NEW"
+        ExpressionAttributeValues={':val': Decimal(rating_increase)},
+        ReturnValues="UPDATED_NEW",
     )
-    return response
 
 
 if __name__ == '__main__':

@@ -45,8 +45,9 @@ def delete_underrated_movie(title, year, rating, dynamodb=None):
 
 if __name__ == '__main__':
     print("Attempting a conditional delete...")
-    delete_response = delete_underrated_movie("The Big New Movie", 2015, 5)
-    if delete_response:
+    if delete_response := delete_underrated_movie(
+        "The Big New Movie", 2015, 5
+    ):
         print("Delete movie succeeded:")
         pprint(delete_response, sort_dicts=False)
 # snippet-end:[dynamodb.python.codeexample.MoviesItemOps06]

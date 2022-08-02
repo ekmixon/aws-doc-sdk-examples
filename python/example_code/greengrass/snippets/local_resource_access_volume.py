@@ -27,9 +27,9 @@ def function_handler(event, context):
     try:
         volume_info = os.stat(volume_path)
         iot_client.publish(topic='LRA/test', payload=str(volume_info))
-        with open(volume_path + '/test', 'a') as output:
+        with open(f'{volume_path}/test', 'a') as output:
             output.write('Successfully write to a file.\n')
-        with open(volume_path + '/test', 'r') as file:
+        with open(f'{volume_path}/test', 'r') as file:
             data = file.read()
         iot_client.publish(topic='LRA/test', payload=data)
     except Exception as err:

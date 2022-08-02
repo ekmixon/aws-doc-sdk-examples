@@ -17,17 +17,13 @@ def put_movie(title, year, plot, rating, dynamodb=None):
         dynamodb = boto3.resource('dynamodb', endpoint_url="http://localhost:8000")
 
     table = dynamodb.Table('Movies')
-    response = table.put_item(
-       Item={
+    return table.put_item(
+        Item={
             'year': year,
             'title': title,
-            'info': {
-                'plot': plot,
-                'rating': rating
-            }
+            'info': {'plot': plot, 'rating': rating},
         }
     )
-    return response
 
 
 if __name__ == '__main__':

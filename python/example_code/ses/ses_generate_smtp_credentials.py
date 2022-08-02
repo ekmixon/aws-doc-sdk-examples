@@ -50,7 +50,7 @@ def calculate_key(secret_access_key, region):
     if region not in SMTP_REGIONS:
         raise ValueError(f"The {region} Region doesn't have an SMTP endpoint.")
 
-    signature = sign(("AWS4" + secret_access_key).encode('utf-8'), DATE)
+    signature = sign(f"AWS4{secret_access_key}".encode('utf-8'), DATE)
     signature = sign(signature, region)
     signature = sign(signature, SERVICE)
     signature = sign(signature, TERMINAL)

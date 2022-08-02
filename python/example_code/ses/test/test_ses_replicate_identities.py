@@ -53,13 +53,16 @@ def get_record_sets(domain, rec_name, dkim_count, existing_tokens):
             'ResourceRecords': [{'Value': f'{cname_string}.dkim.amazonses.com'}],
             'TTL': 1800,
             'Type': 'CNAME'})
-    for ex_domain, token in existing_tokens.items():
-        record_sets.append({
+    record_sets.extend(
+        {
             'Name': f'_amazonses.{ex_domain}.',
             'ResourceRecords': [{'Value': json.dumps(token)}],
             'TTL': 1800,
-            'Type': 'TXT'
-        })
+            'Type': 'TXT',
+        }
+        for ex_domain, token in existing_tokens.items()
+    )
+
     return record_sets
 
 
@@ -67,26 +70,32 @@ def get_record_set_changes(domain, new_token, existing_tokens):
     records = [{'Value': json.dumps(new_token)}]
     if domain in existing_tokens:
         records.insert(0, {'Value': json.dumps(existing_tokens[domain])})
-    changes = [{
-        'Action': 'UPSERT',
-        'ResourceRecordSet': {
-            'Name': f'_amazonses.{domain}',
-            'Type': 'TXT',
-            'TTL': 1800,
-            'ResourceRecords': records}}]
-    return changes
+    return [
+        {
+            'Action': 'UPSERT',
+            'ResourceRecordSet': {
+                'Name': f'_amazonses.{domain}',
+                'Type': 'TXT',
+                'TTL': 1800,
+                'ResourceRecords': records,
+            },
+        }
+    ]
 
 
 def get_record_set_dkim_changes(domain, tokens):
-    changes = [{
-        'Action': 'UPSERT',
-        'ResourceRecordSet': {
-            'Name': f'{token}._domainkey.{domain}',
-            'Type': 'CNAME',
-            'TTL': 1800,
-            'ResourceRecords': [{'Value': f'{token}.dkim.amazonses.com'}]}}
-        for token in tokens]
-    return changes
+    return [
+        {
+            'Action': 'UPSERT',
+            'ResourceRecordSet': {
+                'Name': f'{token}._domainkey.{domain}',
+                'Type': 'CNAME',
+                'TTL': 1800,
+                'ResourceRecords': [{'Value': f'{token}.dkim.amazonses.com'}],
+            },
+        }
+        for token in tokens
+    ]
 
 
 @pytest.mark.parametrize('error_code', [None, 'TestException'])
